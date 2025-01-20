@@ -153,5 +153,51 @@ function HallowHubLibrary.changeOutlineColor(outline)
         wait(2)
     end
 end
+local function playLoadingAnimation()
+    local textTween = TweenService:Create(loadingText, TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {
+        TextSize = 60,
+        Rotation = 360
+    })
+    textTween:Play()
 
+    textTween.Completed:Connect(function()
+        for _ = 1, 2 do
+            for i = 1, 3 do
+                loadingDots.Text = string.rep(".", i)
+                wait(0.16)
+            end
+            loadingDots.Text = ""
+            wait(0.16)
+        end
+        
+        local fadeOutTween = TweenService:Create(loadingText, TweenInfo.new(0.5), {
+            TextTransparency = 1
+        })
+        local dotsFadeOutTween = TweenService:Create(loadingDots, TweenInfo.new(0.5), {
+            TextTransparency = 1
+        })
+        fadeOutTween:Play()
+        dotsFadeOutTween:Play()
+        
+        fadeOutTween.Completed:Connect(function()
+            loadingText:Destroy()
+            loadingDots:Destroy()
+            
+            pumpkin.Visible = true
+            pumpkin.TextSize = 100
+            local pumpkinTween = TweenService:Create(pumpkin, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = UDim2.new(2, 0, 2, 0),
+                Position = UDim2.new(-0.5, 0, -0.5, 0),
+                TextTransparency = 1
+            })
+            pumpkinTween:Play()
+            
+            pumpkinTween.Completed:Connect(function()
+                pumpkin:Destroy()
+                mainFrame.Visible = true
+            end)
+        end)
+    end)
+end
+playLoadingAnimation()
 return HallowHubLibrary
