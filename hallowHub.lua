@@ -153,7 +153,7 @@ function HallowHubLibrary.changeOutlineColor(outline)
         wait(2)
     end
 end
-function HallowHubLibrary.playLoadingAnimation(loadingText, loadingDots, pumpkin, mainFrame)
+function playLoadingAnimation(loadingText, loadingDots, pumpkin, mainFrame)
     local textTween = TweenService:Create(loadingText, TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {
         TextSize = 60,
         Rotation = 360
