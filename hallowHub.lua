@@ -65,3 +65,5 @@ function HallowHub:CreateButton(tab, text, callback)
     
     return button
 end
+
+return HallowHub
