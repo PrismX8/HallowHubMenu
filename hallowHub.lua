@@ -1,69 +1,103 @@
-local HallowHub = {
-    _version = "1.0.0"
-}
+-- HallowHubLib
+local HallowHub = {}
 
--- Import necessary services
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
+local ReplicatedFirst = game:GetService("ReplicatedFirst")
 
--- Constructor function for creating a new instance of the library
-function HallowHub.new()
-    local self = setmetatable({}, {__index = HallowHub})
-    self.ScreenGui = Instance.new("ScreenGui")
-    self.ScreenGui.Name = "HallowHub"
-    self.ScreenGui.ResetOnSpawn = false
-    return self
+-- Helper function: Destroy existing UI
+local function destroyExistingUI(playerGui, uiName)
+    local existingUI = playerGui:FindFirstChild(uiName)
+    if existingUI then
+        existingUI:Destroy()
+    end
 end
 
--- Initialize the UI
-function HallowHub:Init()
-    self.ScreenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-end
-
--- Create a new window
-function HallowHub:CreateWindow(title)
-    local window = Instance.new("Frame")
-    window.Name = "Window"
-    window.Size = UDim2.new(0, 400, 0, 300)
-    window.Position = UDim2.new(0.5, -200, 0.5, -150)
-    window.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    window.Parent = self.ScreenGui
-    
-    -- Add title label
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Text = title
-    titleLabel.Size = UDim2.new(1, 0, 0, 30)
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.TextColor3 = Color3.new(1, 1, 1)
-    titleLabel.Parent = window
-    
-    return window
-end
-
--- Create a new tab in the window
-function HallowHub:CreateTab(window, name)
-    local tab = Instance.new("ScrollingFrame")
-    tab.Name = name
-    tab.Size = UDim2.new(1, 0, 1, -30)
-    tab.Position = UDim2.new(0, 0, 0, 30)
-    tab.BackgroundTransparency = 1
-    tab.Parent = window
-    
-    return tab
-end
-
--- Create a button in a tab
-function HallowHub:CreateButton(tab, text, callback)
+-- Helper function: Create UI elements
+local function createTextButton(props)
     local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 200, 0, 30)
-    button.Position = UDim2.new(0.5, -100, 0, #tab:GetChildren() * 40)
-    button.Text = text
-    button.Parent = tab
-    
-    -- Connect the button click to the callback function
-    button.MouseButton1Click:Connect(callback)
-    
+    button.Size = props.Size or UDim2.new(0, 100, 0, 50)
+    button.Position = props.Position or UDim2.new(0, 0, 0, 0)
+    button.BackgroundColor3 = props.BackgroundColor3 or Color3.fromRGB(45, 45, 45)
+    button.Text = props.Text or "Button"
+    button.TextColor3 = props.TextColor3 or Color3.new(1, 1, 1)
+    button.TextSize = props.TextSize or 18
+    button.Font = props.Font or Enum.Font.SourceSansBold
+    button.Parent = props.Parent
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = button
+
+    -- Add hover effects
+    button.MouseEnter:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {
+            BackgroundColor3 = props.HoverBackgroundColor3 or Color3.fromRGB(65, 65, 65)
+        }):Play()
+    end)
+
+    button.MouseLeave:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {
+            BackgroundColor3 = props.BackgroundColor3 or Color3.fromRGB(45, 45, 45)
+        }):Play()
+    end)
+
     return button
+end
+
+-- Main function: Create the UI
+function HallowHub.createUI(player, options)
+    local playerGui = player:WaitForChild("PlayerGui")
+    destroyExistingUI(playerGui, options.Name or "HallowHub")
+
+    -- Create ScreenGui
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = options.Name or "HallowHub"
+    screenGui.IgnoreGuiInset = true
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = playerGui
+
+    -- Create main frame
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainFrame"
+    mainFrame.Size = options.Size or UDim2.new(0, 400, 0, 300)
+    mainFrame.Position = options.Position or UDim2.new(0.5, -200, 0.5, -150)
+    mainFrame.BackgroundColor3 = options.BackgroundColor3 or Color3.fromRGB(45, 45, 45)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = screenGui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = mainFrame
+
+    -- Create header text
+    local header = Instance.new("TextLabel")
+    header.Size = UDim2.new(1, 0, 0.2, 0)
+    header.Text = options.HeaderText or "HallowHub"
+    header.TextColor3 = Color3.new(1, 1, 1)
+    header.TextSize = 24
+    header.Font = Enum.Font.GothamBold
+    header.BackgroundTransparency = 1
+    header.Parent = mainFrame
+
+    -- Add buttons
+    local buttonY = 100
+    for _, buttonText in ipairs(options.Buttons or {"Home", "Settings", "Credits"}) do
+        createTextButton({
+            Text = buttonText,
+            Position = UDim2.new(0.05, 0, 0, buttonY),
+            Parent = mainFrame
+        })
+        buttonY = buttonY + 50
+    end
+
+    return screenGui
+end
+
+-- Function to destroy the UI
+function HallowHub.destroyUI(player, uiName)
+    local playerGui = player:WaitForChild("PlayerGui")
+    destroyExistingUI(playerGui, uiName)
 end
 
 return HallowHub
