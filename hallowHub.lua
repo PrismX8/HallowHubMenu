@@ -3,7 +3,7 @@ local HallowHubLibrary = {}
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 
-function HallowHubLibrary:CreateWindow(config)
+function HallowHubLibrary.CreateWindow(config)
     config = config or {}
     local window = {}
 
