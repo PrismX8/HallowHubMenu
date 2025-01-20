@@ -3,6 +3,53 @@ local HallowHubLibrary = {}
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 
+function HallowHubLibrary:CreateWindow(config)
+    config = config or {}
+    local window = {}
+
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = config.Name or "HallowHub"
+    screenGui.IgnoreGuiInset = true
+    screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    screenGui.ResetOnSpawn = false
+
+    local loadingText, loadingDots, pumpkin = self:createLoadingScreen(screenGui)
+    local mainFrame, outline = self:createMainFrame(screenGui)
+
+    -- Set up loading screen
+    loadingText.Text = config.LoadingTitle or "HallowHub"
+    loadingDots.Text = config.LoadingSubtitle or ""
+
+    -- Play loading animation
+    self:playLoadingAnimation(loadingText, loadingDots, pumpkin, mainFrame)
+
+    -- Set up main frame
+    mainFrame.Name = config.Name or "HallowHub"
+
+    -- Configuration saving setup (placeholder)
+    if config.ConfigurationSaving and config.ConfigurationSaving.Enabled then
+        -- Implement configuration saving logic here
+        print("Configuration saving enabled")
+    end
+
+    function window:CreateTab(tabName)
+        local leftSide = self:createLeftSide(mainFrame)
+        local tabButton = self:createLeftColumnButton(tabName, #leftSide:GetChildren() * 50, leftSide)
+        self:applyHoverEffect(tabButton)
+        
+        -- Add tab functionality here
+        
+        return tabButton
+    end
+
+    -- Start outline color changing
+    spawn(function()
+        self:changeOutlineColor(outline)
+    end)
+
+    return window
+end
+
 function HallowHubLibrary.createLoadingScreen(screenGui)
     local loadingText = Instance.new("TextLabel")
     loadingText.Size = UDim2.new(1, 0, 0.5, 0)
