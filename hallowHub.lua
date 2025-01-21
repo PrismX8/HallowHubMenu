@@ -1,3 +1,5 @@
+-- UI Library
+
 local UI = {}
 UI.__index = UI
 
@@ -393,3 +395,5 @@ function UI:CreateLabel(text, size, position, parent)
 
     return label
 end
+
+return UI
