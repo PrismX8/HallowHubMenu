@@ -1,3 +1,15 @@
+-- destroy og menu
+local function destroyExistingUI()
+    local player = game.Players.LocalPlayer
+    local playerGui = player:WaitForChild("PlayerGui")
+
+    local existingUI = playerGui:FindFirstChild("HallowHub")
+    if existingUI then
+        existingUI:Destroy()
+    end
+end
+
+destroyExistingUI()
 
 local Lib = {}
 
