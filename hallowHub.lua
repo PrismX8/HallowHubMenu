@@ -79,28 +79,12 @@ function HallowHub:AddTab(tabName)
         Name = tabName,
         Buttons = {},
         Elements = {},
-        -- Add the AddButton method directly to the tab
-        AddButton = function(self, buttonName, callback)
-            local button = HallowHub:CreateElement("TextButton", {
-                Text = buttonName,
-                Size = UDim2.new(0.9, 0, 0, 40 * scaleFactor),
-                Position = UDim2.new(0.05, 0, 0, #self.Elements * 50 * scaleFactor),
-                BackgroundColor3 = Color3.fromRGB(65, 65, 65),
-                TextColor3 = Color3.new(1, 1, 1),
-                TextSize = 16 * scaleFactor
-            }, self.Content)
-
-            HallowHub:AddUICorner(button, 8)
-            button.MouseButton1Click:Connect(callback)
-
-            table.insert(self.Elements, button)
-            HallowHub:UpdateContentSize(self.Content)
-            return button
-        end
+        Content = nil, -- Will hold the content frame
+        Button = nil,  -- Will hold the tab button
     }
 
     -- Create tab button
-    tab.Button = HallowHub:CreateElement("TextButton", {
+    tab.Button = self:CreateElement("TextButton", {
         Text = tabName,
         Size = UDim2.new(1, -20 * scaleFactor, 0, 40 * scaleFactor),
         BackgroundColor3 = Color3.fromRGB(45, 45, 45),
@@ -109,7 +93,7 @@ function HallowHub:AddTab(tabName)
     }, self.TabContainer)
 
     -- Create content frame
-    tab.Content = HallowHub:CreateElement("Frame", {
+    tab.Content = self:CreateElement("Frame", {
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1,
         Visible = false
@@ -124,13 +108,6 @@ function HallowHub:AddTab(tabName)
         self:SwitchTab(tab)
     end)
 
-    table.insert(self.Tabs, tab)
-    if #self.Tabs == 1 then
-        self:SwitchTab(tab)
-    end
-
-    return tab
-end
 
 function HallowHub:SwitchTab(selectedTab)
     for _, tab in pairs(self.Tabs) do
@@ -143,22 +120,30 @@ function HallowHub:SwitchTab(selectedTab)
     self.CurrentTab = selectedTab
 end
 
-function HallowHub:AddButton(tab, buttonName, callback)
-    local button = self:CreateElement("TextButton", {
-        Text = buttonName,
-        Size = UDim2.new(0.9, 0, 0, 40 * scaleFactor),
-        Position = UDim2.new(0.05, 0, 0, #tab.Elements * 50 * scaleFactor),
-        BackgroundColor3 = Color3.fromRGB(65, 65, 65),
-        TextColor3 = Color3.new(1, 1, 1),
-        TextSize = 16 * scaleFactor
-    }, tab.Content)
-    
-    self:AddUICorner(button, 8)
-    button.MouseButton1Click:Connect(callback)
-    
-    table.insert(tab.Elements, button)
-    self:UpdateContentSize(tab.Content)
-    return button
+function tab:AddButton(buttonName, callback)
+        local button = HallowHub:CreateElement("TextButton", {
+            Text = buttonName,
+            Size = UDim2.new(0.9, 0, 0, 40 * scaleFactor),
+            Position = UDim2.new(0.05, 0, 0, #self.Elements * 50 * scaleFactor),
+            BackgroundColor3 = Color3.fromRGB(65, 65, 65),
+            TextColor3 = Color3.new(1, 1, 1),
+            TextSize = 16 * scaleFactor
+        }, self.Content)
+
+        HallowHub:AddUICorner(button, 8)
+        button.MouseButton1Click:Connect(callback)
+
+        table.insert(self.Elements, button)
+        HallowHub:UpdateContentSize(self.Content)
+        return button
+    end
+
+    table.insert(self.Tabs, tab)
+    if #self.Tabs == 1 then
+        self:SwitchTab(tab)
+    end
+
+    return tab
 end
 
 function HallowHub:UpdateContentSize(contentFrame)
