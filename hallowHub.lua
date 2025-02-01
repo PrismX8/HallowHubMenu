@@ -147,10 +147,10 @@ function HallowHub:AddButton(tab, buttonName, callback)
         TextColor3 = Color3.new(1, 1, 1),
         TextSize = 16 * scaleFactor
     }, tab.Content)
-    
+
     self:AddUICorner(button, 8)
     button.MouseButton1Click:Connect(callback)
-    
+
     table.insert(tab.Elements, button)
     self:UpdateContentSize(tab.Content)
     return button
