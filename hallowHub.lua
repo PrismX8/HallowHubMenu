@@ -146,14 +146,19 @@ function HallowHub:SwitchTab(selectedTab)
 end
 
 function HallowHub:UpdateContentSize(contentFrame)
+    if not contentFrame:IsA("ScrollingFrame") then
+        return
+    end
+    
     local totalHeight = 0
     for _, element in pairs(contentFrame:GetChildren()) do
         if element:IsA("GuiObject") then
-            totalHeight += element.AbsoluteSize.Y + 10 * scaleFactor
+            totalHeight = totalHeight + element.AbsoluteSize.Y + 10 * scaleFactor
         end
     end
     contentFrame.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
 end
+
 
 function HallowHub:CreateWindowControls()
     -- Close button
