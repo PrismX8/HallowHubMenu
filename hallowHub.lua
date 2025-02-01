@@ -1,4 +1,4 @@
--- HallowHub UI Library v1.0
+-- HallowHub UI Library v1.0 (FIXED)
 local HallowHub = {}
 HallowHub.__index = HallowHub
 
@@ -77,10 +77,28 @@ end
 function HallowHub:AddTab(tabName)
     local tab = {
         Name = tabName,
-        Buttons = {},
         Elements = {},
-        Content = nil, -- Will hold the content frame
-        Button = nil,  -- Will hold the tab button
+        Content = nil,
+        Button = nil,
+        
+        -- Add the AddButton method directly to the tab
+        AddButton = function(self, buttonName, callback)
+            local button = HallowHub:CreateElement("TextButton", {
+                Text = buttonName,
+                Size = UDim2.new(0.9, 0, 0, 40 * scaleFactor),
+                Position = UDim2.new(0.05, 0, 0, #self.Elements * 50 * scaleFactor),
+                BackgroundColor3 = Color3.fromRGB(65, 65, 65),
+                TextColor3 = Color3.new(1, 1, 1),
+                TextSize = 16 * scaleFactor
+            }, self.Content)
+
+            HallowHub:AddUICorner(button, 8)
+            button.MouseButton1Click:Connect(callback)
+
+            table.insert(self.Elements, button)
+            HallowHub:UpdateContentSize(self.Content)
+            return button
+        end
     }
 
     -- Create tab button
@@ -108,6 +126,13 @@ function HallowHub:AddTab(tabName)
         self:SwitchTab(tab)
     end)
 
+    table.insert(self.Tabs, tab)
+    if #self.Tabs == 1 then
+        self:SwitchTab(tab)
+    end
+
+    return tab
+end
 
 function HallowHub:SwitchTab(selectedTab)
     for _, tab in pairs(self.Tabs) do
