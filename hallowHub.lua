@@ -1,17 +1,4 @@
---[[
-    HallowHub UI Library v1.0
-    Usage:
-    local HallowHub = loadstring(game:HttpGet("URL_TO_SCRIPT"))()
-    local window = HallowHub.NewWindow("My Cool UI")
-    
-    local tab = window:AddTab("Main")
-    tab:AddButton("Click me!", function()
-        print("Button clicked!")
-    end)
-    
-    window:SetLoadingScreenEnabled(true) -- Optional loading screen
---]]
-
+-- HallowHub UI Library v1.0
 local HallowHub = {}
 HallowHub.__index = HallowHub
 
@@ -139,8 +126,6 @@ function HallowHub:SwitchTab(selectedTab)
 end
 
 function HallowHub:AddButton(tab, buttonName, callback)
-    print("Adding button:", buttonName)
-    
     local button = self:CreateElement("TextButton", {
         Text = buttonName,
         Size = UDim2.new(0.9, 0, 0, 40 * scaleFactor),
@@ -149,17 +134,10 @@ function HallowHub:AddButton(tab, buttonName, callback)
         TextColor3 = Color3.new(1, 1, 1),
         TextSize = 16 * scaleFactor
     }, tab.Content)
-
-    if button then
-        print("Button created successfully!")
-    else
-        print("Failed to create button.")
-        return
-    end
-
+    
     self:AddUICorner(button, 8)
     button.MouseButton1Click:Connect(callback)
-
+    
     table.insert(tab.Elements, button)
     self:UpdateContentSize(tab.Content)
     return button
