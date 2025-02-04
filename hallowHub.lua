@@ -334,6 +334,7 @@ function HallowHub:CreateReopenButton()
 end
 
 function HallowHub:PlayLoadingAnimation()
+    print("started")
     -- Initial text animation
     local textTween = TweenService:Create(self.LoadingText, TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {
         TextSize = 60 * self.scaleFactor,
@@ -343,7 +344,7 @@ function HallowHub:PlayLoadingAnimation()
     
     -- Wait for text animation completion
     textTween.Completed:Wait()
-
+print("dots")
     -- Non-blocking dot animation using coroutine
     local function animateDots()
         for _ = 1, 2 do
