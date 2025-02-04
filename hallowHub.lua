@@ -1,10 +1,9 @@
--- HallowHub UI Library v1.0 (FIXED)
 local HallowHub = {}
 HallowHub.__index = HallowHub
 
--- Internal services and variables
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
@@ -13,32 +12,26 @@ local isPhone = false
 
 function HallowHub.NewWindow(windowName)
     local self = setmetatable({}, HallowHub)
-    
     self.WindowName = windowName
     self.Tabs = {}
     self.CurrentTab = nil
     self.UIComponents = {}
-    
     self:InitializeUI()
     return self
 end
 
 function HallowHub:InitializeUI()
-    -- Remove existing UI
     self:DestroyUI()
     
-    -- Create screen GUI
     self.ScreenGui = Instance.new("ScreenGui")
     self.ScreenGui.Name = "HallowHub_" .. self.WindowName
     self.ScreenGui.ResetOnSpawn = false
     self.ScreenGui.Parent = playerGui
-    
-    -- Calculate scaling
+
     local viewportSize = workspace.CurrentCamera.ViewportSize
     scaleFactor = math.min(viewportSize.X / 1920, viewportSize.Y / 1080)
     isPhone = (viewportSize.Y <= 500)
-    
-    -- Create main container
+
     self.MainFrame = self:CreateElement("Frame", {
         Name = "MainFrame",
         Size = UDim2.new(0, 800 * scaleFactor, 0, 500 * scaleFactor),
@@ -47,19 +40,16 @@ function HallowHub:InitializeUI()
         BackgroundColor3 = Color3.fromRGB(35, 35, 35),
         Visible = false
     }, self.ScreenGui)
-    
-    -- Add window styling
+
     self:AddUICorner(self.MainFrame, 10)
     self:AddUIStroke(self.MainFrame, Color3.new(1, 0, 0), 2)
-    
-    -- Create tab area
+
     self.TabContainer = self:CreateElement("Frame", {
         Name = "TabContainer",
         Size = UDim2.new(0.25, 0, 1, 0),
         BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     }, self.MainFrame)
-    
-    -- Create content area
+
     self.ContentContainer = self:CreateElement("ScrollingFrame", {
         Name = "ContentContainer",
         Size = UDim2.new(0.75, 0, 1, 0),
@@ -68,10 +58,146 @@ function HallowHub:InitializeUI()
         ScrollBarThickness = 5,
         CanvasSize = UDim2.new(0, 0, 0, 0)
     }, self.MainFrame)
-    
-    -- Add window controls
+
     self:CreateWindowControls()
     self:MakeDraggable(self.MainFrame)
+end
+
+function HallowHub:MakeDraggable(element)
+    local dragging
+    local dragInput
+    local dragStart
+    local startPos
+
+    local function updateInput(input)
+        local delta = input.Position - dragStart
+        element.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+
+    element.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = element.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    element.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            updateInput(input)
+        end
+    end)
+end
+
+function HallowHub:CreateWindowControls()
+    self.CloseButton = self:CreateElement("TextButton", {
+        Text = "X",
+        Size = UDim2.new(0, 30 * scaleFactor, 0, 30 * scaleFactor),
+        Position = UDim2.new(1, -35 * scaleFactor, 0, 10 * scaleFactor),
+        BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    }, self.MainFrame)
+
+    self.CloseButton.MouseButton1Click:Connect(function()
+        local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tween = TweenService:Create(self.MainFrame, tweenInfo, {
+            Size = UDim2.new(0, 0, 0, 0),
+            Position = UDim2.new(0.5, 0, 0.5, 0)
+        })
+        tween:Play()
+        tween.Completed:Wait()
+        self:DestroyUI()
+    end)
+
+    self.MinimizeButton = self:CreateElement("TextButton", {
+        Text = "-",
+        Size = UDim2.new(0, 30 * scaleFactor, 0, 30 * scaleFactor),
+        Position = UDim2.new(1, -70 * scaleFactor, 0, 10 * scaleFactor),
+        BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    }, self.MainFrame)
+
+    self.MinimizeButton.MouseButton1Click:Connect(function()
+        local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tween = TweenService:Create(self.MainFrame, tweenInfo, {
+            Size = UDim2.new(0, 0, 0, 0),
+            Position = UDim2.new(0.5, 0, 0.5, 0)
+        })
+        tween:Play()
+    end)
+end
+
+function HallowHub:SetLoadingScreenEnabled(enabled)
+    if enabled then
+        self.LoadingFrame = self:CreateElement("Frame", {
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundTransparency = 1
+        }, self.ScreenGui)
+
+        local loadingText = self:CreateElement("TextLabel", {
+            Size = UDim2.new(1, 0, 0.5, 0),
+            Position = UDim2.new(0, 0, 0.2, 0),
+            BackgroundTransparency = 1,
+            Text = "HallowHub",
+            TextColor3 = Color3.new(1, 1, 1),
+            TextSize = 96 * scaleFactor,
+            Font = Enum.Font.GothamBold,
+            TextStrokeTransparency = 0
+        }, self.LoadingFrame)
+
+        local loadingDots = self:CreateElement("TextLabel", {
+            Size = UDim2.new(1, 0, 0, 100 * scaleFactor),
+            Position = UDim2.new(0, 0, 0.35, 0),
+            BackgroundTransparency = 1,
+            Text = "",
+            TextColor3 = Color3.new(1, 1, 1),
+            TextSize = 100 * scaleFactor,
+            Font = Enum.Font.GothamBold,
+            TextStrokeTransparency = 0.3
+        }, self.LoadingFrame)
+
+        local pumpkin = self:CreateElement("TextLabel", {
+            Text = "🎃",
+            TextSize = 100,
+            TextTransparency = 1,
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.new(0.5, 0, 0.5, 0),
+            BackgroundTransparency = 1
+        }, self.LoadingFrame)
+
+        local pumpkinTween = TweenService:Create(pumpkin, TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1), {
+            TextTransparency = 0.5,
+            Rotation = 360
+        })
+        pumpkinTween:Play()
+
+        local dots = {"", ".", "..", "..."}
+        local currentDot = 1
+        while self.LoadingFrame.Parent do
+            loadingDots.Text = dots[currentDot]
+            currentDot = currentDot % 4 + 1
+            wait(0.5)
+        end
+    else
+        if self.LoadingFrame then
+            self.LoadingFrame:Destroy()
+        end
+    end
 end
 
 function HallowHub:AddTab(tabName)
@@ -81,7 +207,6 @@ function HallowHub:AddTab(tabName)
         Content = nil,
         Button = nil,
         
-        -- Add the AddButton method directly to the tab
         AddButton = function(self, buttonName, callback)
             local button = HallowHub:CreateElement("TextButton", {
                 Text = buttonName,
@@ -101,7 +226,6 @@ function HallowHub:AddTab(tabName)
         end
     }
 
-    -- Create tab button
     tab.Button = self:CreateElement("TextButton", {
         Text = tabName,
         Size = UDim2.new(1, -20 * scaleFactor, 0, 40 * scaleFactor),
@@ -110,18 +234,15 @@ function HallowHub:AddTab(tabName)
         TextSize = 18 * scaleFactor
     }, self.TabContainer)
 
-    -- Create content frame
     tab.Content = self:CreateElement("Frame", {
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1,
         Visible = false
     }, self.ContentContainer)
 
-    -- Position tab button
     local yPosition = 120 * scaleFactor + (#self.Tabs * 50 * scaleFactor)
     tab.Button.Position = UDim2.new(0, 10 * scaleFactor, 0, yPosition)
 
-    -- Add tab interaction
     tab.Button.MouseButton1Click:Connect(function()
         self:SwitchTab(tab)
     end)
@@ -159,56 +280,6 @@ function HallowHub:UpdateContentSize(contentFrame)
     contentFrame.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
 end
 
-
-function HallowHub:CreateWindowControls()
-    -- Close button
-    self.CloseButton = self:CreateElement("TextButton", {
-        Text = "X",
-        Size = UDim2.new(0, 30 * scaleFactor, 0, 30 * scaleFactor),
-        Position = UDim2.new(1, -35 * scaleFactor, 0, 10 * scaleFactor),
-        BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    }, self.MainFrame)
-    
-    self.CloseButton.MouseButton1Click:Connect(function()
-        self:DestroyUI()
-    end)
-    
-    -- Minimize button
-    self.MinimizeButton = self:CreateElement("TextButton", {
-        Text = "-",
-        Size = UDim2.new(0, 30 * scaleFactor, 0, 30 * scaleFactor),
-        Position = UDim2.new(1, -70 * scaleFactor, 0, 10 * scaleFactor),
-        BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    }, self.MainFrame)
-    
-    self.MinimizeButton.MouseButton1Click:Connect(function()
-        self.MainFrame.Visible = false
-        local reopenButton = Instance.new("TextButton")
-    reopenButton.Size = scaleUDim2(UDim2.new(0, 50, 0, 50))
-    reopenButton.Position = UDim2.new(0.5, 0, 0, 10 * scaleFactor)
-    reopenButton.AnchorPoint = Vector2.new(0.5, 0)
-    reopenButton.BackgroundColor3 = Color3.fromRGB(112, 41, 99)
-    reopenButton.Text = "🎃"
-    reopenButton.TextSize = 36 * scaleFactor
-    reopenButton.Font = Enum.Font.SourceSansBold
-    reopenButton.Visible = false
-    reopenButton.Parent = screenGui
-
-    local reopenCorner = Instance.new("UICorner")
-    reopenCorner.CornerRadius = UDim.new(0.5, 0)
-    reopenCorner.Parent = reopenButton
-
-    local reopenStroke = Instance.new("UIStroke")
-    reopenStroke.Thickness = 2 * scaleFactor
-    reopenStroke.Color = Color3.fromRGB(255, 68, 0)
-    reopenStroke.Parent = reopenButton
-
-    return mainFrame, minimizeButton, exitButton, reopenButton, leftSide, contentArea
-end
-        local mainFrame, minimizeButton, exitButton, reopenButton, leftSide, contentArea = createMainUI()
-    end)
-end
-
 function HallowHub:CreateElement(elementType, properties, parent)
     local element = Instance.new(elementType)
     for prop, value in pairs(properties) do
@@ -229,105 +300,6 @@ function HallowHub:AddUIStroke(element, color, thickness)
     stroke.Color = color
     stroke.Thickness = thickness * scaleFactor
     stroke.Parent = element
-end
-
-function HallowHub:MakeDraggable(element)
-    local function makeDraggable(frame)
-    local dragging, dragInput, dragStart, startPos
-
-    frame.InputBegan:Connect(
-        function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                dragging = true
-                dragStart = input.Position
-                startPos = frame.Position
-
-                input.Changed:Connect(
-                    function()
-                        if input.UserInputState == Enum.UserInputState.End then
-                            dragging = false
-                        end
-                    end
-                )
-            end
-        end
-    )
-
-    frame.InputChanged:Connect(
-        function(input)
-            if
-                input.UserInputType == Enum.UserInputType.MouseMovement or
-                    input.UserInputType == Enum.UserInputType.Touch
-             then
-                dragInput = input
-            end
-        end
-    )
-
-    UserInputService.InputChanged:Connect(
-        function(input)
-            if input == dragInput and dragging then
-                local delta = input.Position - dragStart
-                frame.Position =
-                    UDim2.new(
-                    startPos.X.Scale,
-                    startPos.X.Offset + delta.X,
-                    startPos.Y.Scale,
-                    startPos.Y.Offset + delta.Y
-                )
-            end
-        end
-    )
-end
-
-makeDraggable(mainFrame)
-makeDraggable(reopenButton)
-end
-
-function HallowHub:SetLoadingScreenEnabled(enabled)
-    if enabled then
-        local function createLoadingScreen()
-    local loadingFrame = Instance.new("Frame")
-    loadingFrame.Size = UDim2.new(1, 0, 1, 0)
-    loadingFrame.BackgroundTransparency = 1
-    loadingFrame.Parent = screenGui
-
-    local loadingText = Instance.new("TextLabel")
-    loadingText.Size = UDim2.new(1, 0, 0.5, 0)
-    loadingText.Position = UDim2.new(0, 0, 0.2, 0)
-    loadingText.BackgroundTransparency = 1
-    loadingText.Text = "HallowHub"
-    loadingText.TextColor3 = Color3.new(1, 1, 1)
-    loadingText.TextSize = 96 * scaleFactor
-    loadingText.Font = Enum.Font.GothamBold
-    loadingText.TextStrokeColor3 = Color3.new(0, 0, 0)
-    loadingText.TextStrokeTransparency = 0
-    loadingText.Parent = loadingFrame
-
-    local loadingDots = Instance.new("TextLabel")
-    loadingDots.Size = UDim2.new(1, 0, 0, 100 * scaleFactor)
-    loadingDots.Position = UDim2.new(0, 0, 0.35, 0)
-    loadingDots.BackgroundTransparency = 1
-    loadingDots.Text = ""
-    loadingDots.TextColor3 = Color3.new(1, 1, 1)
-    loadingDots.TextSize = 100 * scaleFactor
-    loadingDots.Font = Enum.Font.GothamBold
-    loadingDots.TextStrokeColor3 = Color3.fromRGB(114, 0, 88)
-    loadingDots.TextStrokeTransparency = 0.3
-    loadingDots.Parent = loadingFrame
-
-    local pumpkin = Instance.new("TextLabel")
-    pumpkin.Text = "🎃"
-    pumpkin.TextSize = 100
-    pumpkin.TextTransparency = 1
-    pumpkin.AnchorPoint = Vector2.new(0.5, 0.5) -- Center the pumpkin
-    pumpkin.Position = UDim2.new(0.5, 0, 0.5, 0)
-    pumpkin.Visible = false
-
-    return loadingFrame, loadingText, loadingDots, pumpkin
-end
-    local loadingFrame, loadingText, loadingDots, pumpkin = createLoadingScreen()
-    end
 end
 
 function HallowHub:DestroyUI()
