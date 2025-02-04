@@ -334,33 +334,40 @@ function HallowHub:CreateReopenButton()
 end
 
 function HallowHub:PlayLoadingAnimation()
+    -- Initial text animation
     local textTween = TweenService:Create(self.LoadingText, TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {
         TextSize = 60 * self.scaleFactor,
         TextTransparency = 0
     })
     textTween:Play()
-
+    
+    -- Wait for text animation completion
     textTween.Completed:Wait()
 
-    for _ = 1, 2 do
-        for i = 1, 3 do
-            self.LoadingDots.Text = string.rep(".", i)
-            wait(0.16)
+    -- Non-blocking dot animation using coroutine
+    local function animateDots()
+        for _ = 1, 2 do
+            for i = 1, 3 do
+                self.LoadingDots.Text = string.rep(".", i)
+                task.wait(0.16)  -- Use task.wait instead of wait()
+            end
+            self.LoadingDots.Text = ""
+            task.wait(0.16)
         end
-        self.LoadingDots.Text = ""
-        wait(0.16)
     end
+    coroutine.wrap(animateDots)()
 
+    -- Fade out text and dots
     local fadeOutTween = TweenService:Create(self.LoadingText, TweenInfo.new(0.5), {TextTransparency = 1})
     local dotsFadeOutTween = TweenService:Create(self.LoadingDots, TweenInfo.new(0.5), {TextTransparency = 1})
     fadeOutTween:Play()
     dotsFadeOutTween:Play()
 
+    -- Wait for fade completion before destruction
     fadeOutTween.Completed:Wait()
+    dotsFadeOutTween.Completed:Wait()
 
-    self.LoadingText:Destroy()
-    self.LoadingDots:Destroy()
-
+    -- Pumpkin animation
     self.Pumpkin.Visible = true
     local pumpkinTween = TweenService:Create(self.Pumpkin, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
         Size = UDim2.new(2, 0, 2, 0),
@@ -369,10 +376,14 @@ function HallowHub:PlayLoadingAnimation()
     })
     pumpkinTween:Play()
 
-    pumpkinTween.Completed:Wait()
-    self.Pumpkin:Destroy()
-    self.MainFrame.Visible = true
+    -- Final cleanup after pumpkin animation
+    pumpkinTween.Completed:Connect(function()
+        self.Pumpkin:Destroy()
+        self.MainFrame.Visible = true
+        self.LoadingFrame:Destroy()  -- Clean up loading screen
+    end)
 end
+
 
 function HallowHub:DestroyUI()
     if self.ScreenGui then
