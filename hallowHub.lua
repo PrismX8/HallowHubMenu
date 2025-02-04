@@ -232,7 +232,56 @@ function HallowHub:AddUIStroke(element, color, thickness)
 end
 
 function HallowHub:MakeDraggable(element)
-    -- Draggable implementation from original code
+    local function makeDraggable(frame)
+    local dragging, dragInput, dragStart, startPos
+
+    frame.InputBegan:Connect(
+        function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                dragStart = input.Position
+                startPos = frame.Position
+
+                input.Changed:Connect(
+                    function()
+                        if input.UserInputState == Enum.UserInputState.End then
+                            dragging = false
+                        end
+                    end
+                )
+            end
+        end
+    )
+
+    frame.InputChanged:Connect(
+        function(input)
+            if
+                input.UserInputType == Enum.UserInputType.MouseMovement or
+                    input.UserInputType == Enum.UserInputType.Touch
+             then
+                dragInput = input
+            end
+        end
+    )
+
+    UserInputService.InputChanged:Connect(
+        function(input)
+            if input == dragInput and dragging then
+                local delta = input.Position - dragStart
+                frame.Position =
+                    UDim2.new(
+                    startPos.X.Scale,
+                    startPos.X.Offset + delta.X,
+                    startPos.Y.Scale,
+                    startPos.Y.Offset + delta.Y
+                )
+            end
+        end
+    )
+end
+
+makeDraggable(mainFrame)
+makeDraggable(reopenButton)
 end
 
 function HallowHub:SetLoadingScreenEnabled(enabled)
