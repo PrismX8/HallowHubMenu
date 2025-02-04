@@ -20,6 +20,14 @@ function HallowHub.NewWindow(windowName)
 end
 
 function HallowHub:InitializeUI()
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+    local playerGui = player:WaitForChild("PlayerGui") -- Wait for PlayerGui
+
+    self.ScreenGui = Instance.new("ScreenGui")
+    self.ScreenGui.Name = "HallowHub_" .. self.WindowName
+    self.ScreenGui.ResetOnSpawn = false
+    self.ScreenGui.Parent = playerGui
     self.ScreenGui = Instance.new("ScreenGui")
     self.ScreenGui.Name = "HallowHub_" .. self.WindowName
     self.ScreenGui.ResetOnSpawn = false
@@ -104,24 +112,32 @@ function HallowHub:CreateMainUI()
 end
 
 function HallowHub:CreateUserInfo()
-    -- Get the LocalPlayer safely
     local Players = game:GetService("Players")
     local player = Players.LocalPlayer
-    
-    -- Ensure player exists and UserId is available
+
+    -- Verify player exists
     if not player or not player:IsDescendantOf(Players) then
         warn("Player not found!")
         return
     end
 
-    -- Create user info container
+    -- Wait for UserId
+    local success, errorMsg = pcall(function()
+        player:WaitForChild("UserId")
+    end)
+    if not success then
+        warn("UserId error:", errorMsg)
+        return
+    end
+
+    -- Create user info frame
     local userInfo = self:CreateElement("Frame", {
         Size = UDim2.new(1, 0, 0, 60 * self.scaleFactor),
         BackgroundTransparency = 1
     }, self.LeftSide)
 
-    -- Get player thumbnail safely
-    local success, thumbnail = pcall(function()
+    -- Get thumbnail with error handling
+    local thumbnailSuccess, thumbnail = pcall(function()
         return Players:GetUserThumbnailAsync(
             player.UserId,
             Enum.ThumbnailType.HeadShot,
@@ -129,35 +145,36 @@ function HallowHub:CreateUserInfo()
         )
     end)
 
-    -- Create avatar with error handling
+    -- Create avatar
     local avatar = self:CreateElement("ImageLabel", {
         Size = UDim2.new(0, 40 * self.scaleFactor, 0, 40 * self.scaleFactor),
         Position = UDim2.new(0, 10 * self.scaleFactor, 0, 10 * self.scaleFactor),
-        Image = success and thumbnail or "rbxasset://textures/ui/LuaApp/graphic/gr-default-avatar.png"
+        Image = thumbnailSuccess and thumbnail or "rbxasset://textures/ui/LuaApp/graphic/gr-default-avatar.png"
     }, userInfo)
     self:AddUICorner(avatar, 1, true)
 
-    -- Create display name label
+    -- Display name label
     self:CreateElement("TextLabel", {
+        Text = player.DisplayName or player.Name,
         Size = UDim2.new(1, -60 * self.scaleFactor, 0, 20 * self.scaleFactor),
         Position = UDim2.new(0, 60 * self.scaleFactor, 0, 10 * self.scaleFactor),
-        Text = player.DisplayName or player.Name,
         TextXAlignment = Enum.TextXAlignment.Left,
         TextSize = 18 * self.scaleFactor,
         Font = Enum.Font.GothamSemibold
     }, userInfo)
 
-    -- Create username label
+    -- Username label
     self:CreateElement("TextLabel", {
+        Text = "@" .. player.Name,
         Size = UDim2.new(1, -60 * self.scaleFactor, 0, 20 * self.scaleFactor),
         Position = UDim2.new(0, 60 * self.scaleFactor, 0, 30 * self.scaleFactor),
-        Text = "@" .. player.Name,
         TextColor3 = Color3.new(0.7, 0.7, 0.7),
         TextXAlignment = Enum.TextXAlignment.Left,
         TextSize = 14 * self.scaleFactor,
         Font = Enum.Font.Gotham
     }, userInfo)
 end
+
 
 
 function HallowHub:AddTab(tabName)
