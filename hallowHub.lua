@@ -215,7 +215,46 @@ end
 
 function HallowHub:SetLoadingScreenEnabled(enabled)
     if enabled then
-        -- Implement loading screen from original code
+        local function createLoadingScreen()
+    local loadingFrame = Instance.new("Frame")
+    loadingFrame.Size = UDim2.new(1, 0, 1, 0)
+    loadingFrame.BackgroundTransparency = 1
+    loadingFrame.Parent = screenGui
+
+    local loadingText = Instance.new("TextLabel")
+    loadingText.Size = UDim2.new(1, 0, 0.5, 0)
+    loadingText.Position = UDim2.new(0, 0, 0.2, 0)
+    loadingText.BackgroundTransparency = 1
+    loadingText.Text = "HallowHub"
+    loadingText.TextColor3 = Color3.new(1, 1, 1)
+    loadingText.TextSize = 96 * scaleFactor
+    loadingText.Font = Enum.Font.GothamBold
+    loadingText.TextStrokeColor3 = Color3.new(0, 0, 0)
+    loadingText.TextStrokeTransparency = 0
+    loadingText.Parent = loadingFrame
+
+    local loadingDots = Instance.new("TextLabel")
+    loadingDots.Size = UDim2.new(1, 0, 0, 100 * scaleFactor)
+    loadingDots.Position = UDim2.new(0, 0, 0.35, 0)
+    loadingDots.BackgroundTransparency = 1
+    loadingDots.Text = ""
+    loadingDots.TextColor3 = Color3.new(1, 1, 1)
+    loadingDots.TextSize = 100 * scaleFactor
+    loadingDots.Font = Enum.Font.GothamBold
+    loadingDots.TextStrokeColor3 = Color3.fromRGB(114, 0, 88)
+    loadingDots.TextStrokeTransparency = 0.3
+    loadingDots.Parent = loadingFrame
+
+    local pumpkin = Instance.new("TextLabel")
+    pumpkin.Text = "🎃"
+    pumpkin.TextSize = 100
+    pumpkin.TextTransparency = 1
+    pumpkin.AnchorPoint = Vector2.new(0.5, 0.5) -- Center the pumpkin
+    pumpkin.Position = UDim2.new(0.5, 0, 0.5, 0)
+    pumpkin.Visible = false
+
+    return loadingFrame, loadingText, loadingDots, pumpkin
+end
     end
 end
 
