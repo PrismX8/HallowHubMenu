@@ -104,28 +104,50 @@ function HallowHub:CreateMainUI()
 end
 
 function HallowHub:CreateUserInfo()
+    -- Get the LocalPlayer safely
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+    
+    -- Ensure player exists and UserId is available
+    if not player or not player:IsDescendantOf(Players) then
+        warn("Player not found!")
+        return
+    end
+
+    -- Create user info container
     local userInfo = self:CreateElement("Frame", {
         Size = UDim2.new(1, 0, 0, 60 * self.scaleFactor),
-        Position = UDim2.new(0, 0, 0, 50 * self.scaleFactor),
         BackgroundTransparency = 1
     }, self.LeftSide)
 
+    -- Get player thumbnail safely
+    local success, thumbnail = pcall(function()
+        return Players:GetUserThumbnailAsync(
+            player.UserId,
+            Enum.ThumbnailType.HeadShot,
+            Enum.ThumbnailSize.Size420x420
+        )
+    end)
+
+    -- Create avatar with error handling
     local avatar = self:CreateElement("ImageLabel", {
         Size = UDim2.new(0, 40 * self.scaleFactor, 0, 40 * self.scaleFactor),
         Position = UDim2.new(0, 10 * self.scaleFactor, 0, 10 * self.scaleFactor),
-        Image = Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+        Image = success and thumbnail or "rbxasset://textures/ui/LuaApp/graphic/gr-default-avatar.png"
     }, userInfo)
     self:AddUICorner(avatar, 1, true)
 
+    -- Create display name label
     self:CreateElement("TextLabel", {
         Size = UDim2.new(1, -60 * self.scaleFactor, 0, 20 * self.scaleFactor),
         Position = UDim2.new(0, 60 * self.scaleFactor, 0, 10 * self.scaleFactor),
-        Text = player.DisplayName,
+        Text = player.DisplayName or player.Name,
         TextXAlignment = Enum.TextXAlignment.Left,
         TextSize = 18 * self.scaleFactor,
         Font = Enum.Font.GothamSemibold
     }, userInfo)
 
+    -- Create username label
     self:CreateElement("TextLabel", {
         Size = UDim2.new(1, -60 * self.scaleFactor, 0, 20 * self.scaleFactor),
         Position = UDim2.new(0, 60 * self.scaleFactor, 0, 30 * self.scaleFactor),
@@ -136,6 +158,7 @@ function HallowHub:CreateUserInfo()
         Font = Enum.Font.Gotham
     }, userInfo)
 end
+
 
 function HallowHub:AddTab(tabName)
     local tab = {
