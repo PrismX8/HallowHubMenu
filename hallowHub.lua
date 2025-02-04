@@ -183,7 +183,29 @@ function HallowHub:CreateWindowControls()
     
     self.MinimizeButton.MouseButton1Click:Connect(function()
         self.MainFrame.Visible = false
-        -- Add reopen button logic if needed
+        local reopenButton = Instance.new("TextButton")
+    reopenButton.Size = scaleUDim2(UDim2.new(0, 50, 0, 50))
+    reopenButton.Position = UDim2.new(0.5, 0, 0, 10 * scaleFactor)
+    reopenButton.AnchorPoint = Vector2.new(0.5, 0)
+    reopenButton.BackgroundColor3 = Color3.fromRGB(112, 41, 99)
+    reopenButton.Text = "🎃"
+    reopenButton.TextSize = 36 * scaleFactor
+    reopenButton.Font = Enum.Font.SourceSansBold
+    reopenButton.Visible = false
+    reopenButton.Parent = screenGui
+
+    local reopenCorner = Instance.new("UICorner")
+    reopenCorner.CornerRadius = UDim.new(0.5, 0)
+    reopenCorner.Parent = reopenButton
+
+    local reopenStroke = Instance.new("UIStroke")
+    reopenStroke.Thickness = 2 * scaleFactor
+    reopenStroke.Color = Color3.fromRGB(255, 68, 0)
+    reopenStroke.Parent = reopenButton
+
+    return mainFrame, minimizeButton, exitButton, reopenButton, leftSide, contentArea
+end
+        local mainFrame, minimizeButton, exitButton, reopenButton, leftSide, contentArea = createMainUI()
     end)
 end
 
@@ -255,6 +277,7 @@ function HallowHub:SetLoadingScreenEnabled(enabled)
 
     return loadingFrame, loadingText, loadingDots, pumpkin
 end
+    local loadingFrame, loadingText, loadingDots, pumpkin = createLoadingScreen()
     end
 end
 
