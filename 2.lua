@@ -507,7 +507,32 @@ function HallowHub:CreateLabel(tab, properties)
 end
 
 function HallowHub:CreateTextBox(tab, properties)
-    local textBox = self:CreateElement("TextBox", properties, tab.Content)
+    local defaultProps = {
+        Size = UDim2.new(1, -20 * self.ScaleFactor, 0, 40 * self.ScaleFactor),
+        BackgroundColor3 = COLORS.SECONDARY,
+        TextColor3 = COLORS.TEXT,
+        TextSize = 16 * self.ScaleFactor,
+        PlaceholderColor3 = Color3.new(0.7, 0.7, 0.7),
+        Font = Enum.Font.SourceSans,
+        ClearTextOnFocus = false,
+        LayoutOrder = #tab.Elements + 1
+    }
+    
+    -- Merge properties
+    local mergedProps = {}
+    for k, v in pairs(defaultProps) do mergedProps[k] = v end
+    for k, v in pairs(properties or {}) do mergedProps[k] = v end
+    
+    local textBox = self:CreateElement("TextBox", mergedProps, tab.Content)
+    self:AddUICorner(textBox, CORNER_RADIUS)
+    self:AddUIStroke(textBox, COLORS.STROKE, STROKE_THICKNESS)
+    
+    -- Add input padding
+    local padding = Instance.new("UIPadding")
+    padding.PaddingLeft = UDim.new(0, 12 * self.ScaleFactor)
+    padding.PaddingRight = UDim.new(0, 12 * self.ScaleFactor)
+    padding.Parent = textBox
+    
     table.insert(tab.Elements, textBox)
     return textBox
 end
@@ -592,6 +617,34 @@ function HallowHub:CreateDropdown(tab, properties, options)
 end
 
 function HallowHub:CreateToggle(tab, properties, callback)
+    function HallowHub:CreateToggle(tab, properties, callback)
+    local defaultProps = {
+        Size = UDim2.new(1, -20 * self.ScaleFactor, 0, 40 * self.ScaleFactor),
+        BackgroundColor3 = COLORS.SECONDARY,
+        Text = "Toggle",
+        TextColor3 = COLORS.TEXT,
+        TextSize = 16 * self.ScaleFactor,
+        Font = Enum.Font.SourceSansSemibold,
+        LayoutOrder = #tab.Elements + 1
+    }
+    
+    -- Merge properties
+    local mergedProps = {}
+    for k, v in pairs(defaultProps) do mergedProps[k] = v end
+    for k, v in pairs(properties or {}) do mergedProps[k] = v end
+    
+    local toggle = self:CreateElement("TextButton", mergedProps, tab.Content)
+    self:AddUICorner(toggle, CORNER_RADIUS)
+    self:AddUIStroke(toggle, COLORS.STROKE, STROKE_THICKNESS)
+    
+    -- Toggle indicator
+    local indicator = self:CreateElement("Frame", {
+        Size = UDim2.new(0, 24 * self.ScaleFactor, 0, 24 * self.ScaleFactor),
+        Position = UDim2.new(1, -32 * self.ScaleFactor, 0.5, 0),
+        AnchorPoint = Vector2.new(1, 0.5),
+        BackgroundColor3 = Color3.fromRGB(80, 80, 80),
+    }, toggle)
+    self:AddUICorner(indicator, 12 * self.ScaleFactor, true)
     local toggle = self:CreateElement("TextButton", properties, tab.Content)
     local isOn = false
     toggle.MouseButton1Click:Connect(function()
