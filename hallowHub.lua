@@ -1,4 +1,4 @@
-
+--new
 local HallowHub = {}
 HallowHub.__index = HallowHub
 
@@ -148,7 +148,7 @@ function HallowHub:CreateUserInfo()
     end
 
     local success, errorMsg = pcall(function()
-        player:WaitForChild("UserId")
+        player.UserId
     end)
     if not success then
         warn("UserId error:", errorMsg)
