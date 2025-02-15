@@ -210,12 +210,27 @@ function HallowHub:AddTab(tabName)
     self:AddUICorner(tab.Button, CORNER_RADIUS)
 
     tab.Content = self:CreateElement("ScrollingFrame", {
-        Size = UDim2.new(1, 0, 1, 0),
+        Size = UDim2.new(1, 0, 1, -10 * self.ScaleFactor),
+        Position = UDim2.new(0, 0, 0, 10 * self.ScaleFactor),
         BackgroundTransparency = 1,
-        Visible = false,
         ScrollBarThickness = 4,
         ScrollBarImageColor3 = COLORS.ACCENT,
+        CanvasSize = UDim2.new(0, 0, 0, 0),
+        AutomaticCanvasSize = Enum.AutomaticSize.Y,
     }, self.ContentArea)
+
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.Parent = tab.Content
+    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    UIListLayout.Padding = UDim.new(0, 10 * self.ScaleFactor)
+
+    -- Add content padding
+    local contentPadding = Instance.new("UIPadding")
+    contentPadding.PaddingLeft = UDim.new(0, 10 * self.ScaleFactor)
+    contentPadding.PaddingRight = UDim.new(0, 10 * self.ScaleFactor)
+    contentPadding.PaddingTop = UDim.new(0, 10 * self.ScaleFactor)
+    contentPadding.PaddingBottom = UDim.new(0, 10 * self.ScaleFactor)
+    contentPadding.Parent = tab.Content
 
     local UIListLayout = Instance.new("UIListLayout")
     UIListLayout.Parent = tab.Content
@@ -431,14 +446,62 @@ function HallowHub:DestroyUI()
 end
 
 -- New UI element creation functions
+-- Updated CreateButton function with proper styling and spacing
 function HallowHub:CreateButton(tab, properties)
-    local button = self:CreateElement("TextButton", properties, tab.Content)
+    local defaultProps = {
+        Size = UDim2.new(1, -20 * self.ScaleFactor, 0, 40 * self.ScaleFactor),
+        BackgroundColor3 = COLORS.SECONDARY,
+        TextColor3 = COLORS.TEXT,
+        TextSize = 18 * self.ScaleFactor,
+        Font = Enum.Font.SourceSansBold,
+        AutoButtonColor = true,
+        LayoutOrder = #tab.Elements + 1
+    }
+    
+    -- Merge user properties with defaults
+    local mergedProps = {}
+    for k, v in pairs(defaultProps) do mergedProps[k] = v end
+    for k, v in pairs(properties or {}) do mergedProps[k] = v end
+    
+    local button = self:CreateElement("TextButton", mergedProps, tab.Content)
+    self:AddUICorner(button, CORNER_RADIUS)
+    self:AddUIStroke(button, COLORS.STROKE, STROKE_THICKNESS)
+    
+    -- Add internal padding
+    local padding = Instance.new("UIPadding")
+    padding.PaddingLeft = UDim.new(0, 12 * self.ScaleFactor)
+    padding.PaddingRight = UDim.new(0, 12 * self.ScaleFactor)
+    padding.Parent = button
+    
     table.insert(tab.Elements, button)
     return button
 end
 
+-- Updated CreateLabel function with proper text alignment
 function HallowHub:CreateLabel(tab, properties)
-    local label = self:CreateElement("TextLabel", properties, tab.Content)
+    local defaultProps = {
+        Size = UDim2.new(1, -20 * self.ScaleFactor, 0, 24 * self.ScaleFactor),
+        BackgroundTransparency = 1,
+        TextColor3 = COLORS.TEXT,
+        TextSize = 16 * self.ScaleFactor,
+        Font = Enum.Font.SourceSansSemibold,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        LayoutOrder = #tab.Elements + 1
+    }
+    
+    -- Merge properties
+    local mergedProps = {}
+    for k, v in pairs(defaultProps) do mergedProps[k] = v end
+    for k, v in pairs(properties or {}) do mergedProps[k] = v end
+    
+    local label = self:CreateElement("TextLabel", mergedProps, tab.Content)
+    
+    -- Add label padding
+    local padding = Instance.new("UIPadding")
+    padding.PaddingLeft = UDim.new(0, 10 * self.ScaleFactor)
+    padding.PaddingRight = UDim.new(0, 10 * self.ScaleFactor)
+    padding.Parent = label
+    
     table.insert(tab.Elements, label)
     return label
 end
