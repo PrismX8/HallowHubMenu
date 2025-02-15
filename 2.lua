@@ -1,3 +1,4 @@
+--new
 local HallowHub = {}
 HallowHub.__index = HallowHub
 
@@ -537,33 +538,146 @@ function HallowHub:CreateTextBox(tab, properties)
     return textBox
 end
 
-function HallowHub:CreateSlider(tab, properties)
-    local slider = Instance.new("Frame")
-    for prop, value in pairs(properties) do
-        slider[prop] = value
-    end
-    slider.Parent = tab.Content
+function HallowHub:CreateSlider(tab, properties, callback)
+    -- Default properties for the slider
+    local defaultProps = {
+        Size = UDim2.new(1, -20 * self.ScaleFactor, 0, 60 * self.ScaleFactor), -- Slider container size
+        BackgroundTransparency = 1, -- Transparent background
+        LayoutOrder = #tab.Elements + 1, -- Automatically set layout order
+    }
 
-    local background = self:CreateElement("Frame", {
-        Size = UDim2.new(1, 0, 0.2, 0),
-        BackgroundColor3 = COLORS.SECONDARY,
-        Position = UDim2.new(0, 0, 0.4, 0),
-        BorderSizePixel = 0,
-    }, slider)
+    -- Merge user-provided properties with defaults
+    local mergedProps = {}
+    for k, v in pairs(defaultProps) do mergedProps[k] = v end
+    for k, v in pairs(properties or {}) do mergedProps[k] = v end
 
+    -- Create the slider container
+    local sliderContainer = self:CreateElement("Frame", mergedProps, tab.Content)
+
+    -- Label for the slider
+    local label = self:CreateElement("TextLabel", {
+        Size = UDim2.new(1, 0, 0, 20 * self.ScaleFactor), -- Label size
+        BackgroundTransparency = 1, -- Transparent background
+        Text = properties.Label or "Slider", -- Default label text
+        TextColor3 = COLORS.TEXT, -- Text color
+        TextSize = 14 * self.ScaleFactor, -- Text size
+        Font = Enum.Font.SourceSansSemibold, -- Font
+        TextXAlignment = Enum.TextXAlignment.Left, -- Left-aligned text
+    }, sliderContainer)
+
+    -- Slider track (background)
+    local track = self:CreateElement("Frame", {
+        Size = UDim2.new(1, 0, 0, 4 * self.ScaleFactor), -- Track height
+        Position = UDim2.new(0, 0, 1, -14 * self.ScaleFactor), -- Position at the bottom
+        AnchorPoint = Vector2.new(0, 1), -- Anchor to bottom-left
+        BackgroundColor3 = COLORS.SECONDARY, -- Track color
+    }, sliderContainer)
+    self:AddUICorner(track, 2 * self.ScaleFactor) -- Rounded corners
+
+    -- Slider fill (progress indicator)
+    local fill = self:CreateElement("Frame", {
+        Size = UDim2.new(0, 0, 1, 0), -- Initial fill size (0%)
+        BackgroundColor3 = COLORS.ACCENT, -- Fill color
+    }, track)
+    self:AddUICorner(fill, 2 * self.ScaleFactor) -- Rounded corners
+
+    -- Slider thumb (draggable handle)
     local thumb = self:CreateElement("Frame", {
-        Size = UDim2.new(0, 20, 1, 0),
-        BackgroundColor3 = COLORS.ACCENT,
-        Position = UDim2.new(0, 0, 0, 0),
-        BorderSizePixel = 0,
-        Draggable = true,
-    }, background)
+        Size = UDim2.new(0, 20 * self.ScaleFactor, 1, 0), -- Thumb size
+        AnchorPoint = Vector2.new(0.5, 0.5), -- Center anchor
+        Position = UDim2.new(0, 0, 0.5, 0), -- Initial position
+        BackgroundColor3 = COLORS.TEXT, -- Thumb color
+    }, track)
+    self:AddUICorner(thumb, 10 * self.ScaleFactor, true) -- Circular thumb
 
-    -- Implement slider drag functionality here
-    -- Update the slider's value based on the thumb's position
+    -- Value display label
+    local valueLabel = self:CreateElement("TextLabel", {
+        Size = UDim2.new(1, 0, 0, 20 * self.ScaleFactor), -- Value label size
+        Position = UDim2.new(0, 0, 0, -24 * self.ScaleFactor), -- Position above the track
+        BackgroundTransparency = 1, -- Transparent background
+        Text = "0%", -- Initial value
+        TextColor3 = COLORS.TEXT, -- Text color
+        TextSize = 14 * self.ScaleFactor, -- Text size
+        Font = Enum.Font.SourceSansSemibold, -- Font
+        TextXAlignment = Enum.TextXAlignment.Left, -- Left-aligned text
+    }, sliderContainer)
 
-    table.insert(tab.Elements, slider)
-    return slider
+    -- Slider logic
+    local minValue = properties.Min or 0 -- Minimum value (default: 0)
+    local maxValue = properties.Max or 100 -- Maximum value (default: 100)
+    local currentValue = minValue -- Start at the minimum value
+
+    -- Function to update the slider's visual state
+    local function updateSlider(value)
+        -- Clamp the value between min and max
+        value = math.clamp(value, minValue, maxValue)
+
+        -- Calculate the percentage of the slider
+        local percent = (value - minValue) / (maxValue - minValue)
+
+        -- Update the fill and thumb positions
+        fill.Size = UDim2.new(percent, 0, 1, 0)
+        thumb.Position = UDim2.new(percent, 0, 0.5, 0)
+
+        -- Update the value label
+        valueLabel.Text = tostring(math.floor(value)) .. (properties.Unit or "%")
+
+        -- Invoke the callback if provided
+        if callback then
+            callback(value)
+        end
+    end
+
+    -- Function to handle thumb dragging
+    local function onThumbDrag(input)
+        local trackAbsoluteSize = track.AbsoluteSize.X
+        local thumbAbsoluteSize = thumb.AbsoluteSize.X
+        local mouseX = input.Position.X
+        local trackStart = track.AbsolutePosition.X
+        local trackEnd = trackStart + trackAbsoluteSize
+
+        -- Calculate the new position of the thumb
+        local newX = math.clamp(mouseX - trackStart, 0, trackAbsoluteSize)
+        local percent = newX / trackAbsoluteSize
+
+        -- Calculate the new value
+        local newValue = minValue + (maxValue - minValue) * percent
+
+        -- Update the slider
+        updateSlider(newValue)
+    end
+
+    -- Connect input events to the thumb
+    thumb.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            -- Start dragging
+            local connection
+            connection = input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    -- Stop dragging
+                    connection:Disconnect()
+                else
+                    -- Update thumb position while dragging
+                    onThumbDrag(input)
+                end
+            end)
+        end
+    end)
+
+    -- Connect input events to the track (click to jump)
+    track.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            onThumbDrag(input)
+        end
+    end)
+
+    -- Initialize the slider with the default value
+    updateSlider(currentValue)
+
+    -- Add the slider to the tab's elements
+    table.insert(tab.Elements, sliderContainer)
+
+    return sliderContainer
 end
 
 function HallowHub:CreateDropdown(tab, properties, options)
