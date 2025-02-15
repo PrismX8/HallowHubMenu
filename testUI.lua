@@ -5,7 +5,7 @@ local DRR = {};
 DRR["1"] = Instance.new("ScreenGui", game:GetService("CoreGui"));
 DRR["1"]["IgnoreGuiInset"] = true;
 DRR["1"]["ScreenInsets"] = Enum.ScreenInsets.DeviceSafeInsets;
-DRR["1"]["Name"] = [[DrRay]];
+DRR["1"]["Name"] = [[HallowHub]];
 DRR["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling;
 
 -- DrRay.TopBar
