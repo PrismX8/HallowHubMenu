@@ -419,9 +419,9 @@ function HallowHub:PlayLoadingAnimation()
     success, errorMessage = pcall(function()
         self.Pumpkin.Visible = true
         local pumpkinTween = TweenService:Create(self.Pumpkin, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, 200 * self.scaleFactor, 0, 200 * self.scaleFactor),
-            TextTransparency = 0
-        })
+    Size = UDim2.new(0, 200 * self.ScaleFactor, 0, 200 * self.ScaleFactor), -- Capital S in ScaleFactor
+    TextTransparency = 0
+})
         pumpkinTween:Play()
         pumpkinTween.Completed:Wait()
     end)
@@ -449,6 +449,16 @@ function HallowHub:PlayLoadingAnimation()
         return -- Prevent the code from running after error
     end
     print("PlayLoadingAnimation finished successfully")
+
+    -- Add this at the end of PlayLoadingAnimation
+task.delay(5, function() -- Safety timeout
+    if self.LoadingFrame and self.LoadingFrame.Parent then
+        self.LoadingFrame:Destroy()
+    end
+    if self.MainFrame then
+        self.MainFrame.Visible = true
+    end
+end)
 
 end
 
