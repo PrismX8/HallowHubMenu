@@ -209,7 +209,7 @@ DRR["1b"]["BorderSizePixel"] = 0;
 DRR["1b"]["AutoButtonColor"] = false;
 DRR["1b"]["BackgroundColor3"] = Color3.fromRGB(42, 42, 58);
 DRR["1b"]["Size"] = UDim2.new(0.23481373488903046, 0, 0.682426393032074, 0);
-DRR["1b"]["Name"] = [[Title]];
+DRR["1b"]["Name"] = "HallowHub 🎃";
 DRR["1b"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 DRR["1b"]["Position"] = UDim2.new(0.015024710446596146, 0, 0.18421050906181335, 0);
 
