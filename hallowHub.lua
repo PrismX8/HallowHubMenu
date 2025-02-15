@@ -1,4 +1,4 @@
---new
+
 local HallowHub = {}
 HallowHub.__index = HallowHub
 
@@ -373,93 +373,63 @@ end
 function HallowHub:PlayLoadingAnimation()
     print("PlayLoadingAnimation started")
 
-    local success, errorMessage
+    -- Safety timeout to ensure loading screen disappears
+    local safetyTimeout = task.delay(10, function()
+        if self.LoadingFrame and self.LoadingFrame.Parent then
+            self.LoadingFrame:Destroy()
+        end
+        if self.MainFrame then
+            self.MainFrame.Visible = true
+        end
+        warn("Loading animation safety timeout triggered")
+    end)
 
     -- Text Animation
-    success, errorMessage = pcall(function()
-        local textTween = TweenService:Create(self.LoadingText, TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {
-            TextSize = 60 * self.ScaleFactor,
-            TextTransparency = 0
-        })
-        textTween:Play()
-        textTween.Completed:Wait()
-    end)
-
-    if not success then
-        warn("Text Animation failed:", errorMessage)
-        self.MainFrame.Visible = true -- Fallback: Make the UI visible anyway
-        self.LoadingFrame:Destroy()
-        return  -- Prevent further animation steps
-    end
-
-    print("Text Animation completed")
+    local textTween = TweenService:Create(self.LoadingText, TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {
+        TextSize = 60 * self.ScaleFactor,
+        TextTransparency = 0
+    })
+    textTween:Play()
+    textTween.Completed:Wait()
+    print("Text animation completed")
 
     -- Dot Animation
-    success, errorMessage = pcall(function()
-        for _ = 1, 2 do
-            for i = 1, 3 do
-                self.LoadingDots.Text = string.rep(".", i)
-                task.wait(0.3)
-            end
-            self.LoadingDots.Text = ""
+    for _ = 1, 2 do
+        for i = 1, 3 do
+            self.LoadingDots.Text = string.rep(".", i)
             task.wait(0.3)
         end
-    end)
-
-    if not success then
-        warn("Dot Animation failed:", errorMessage)
-        self.MainFrame.Visible = true -- Fallback: Make the UI visible anyway
-        self.LoadingFrame:Destroy()
-        return  -- Prevent further animation steps
+        self.LoadingDots.Text = ""
+        task.wait(0.3)
     end
-
-    print("Dot Animation completed")
+    print("Dot animation completed")
 
     -- Pumpkin Animation
-    success, errorMessage = pcall(function()
-        self.Pumpkin.Visible = true
-        local pumpkinTween = TweenService:Create(self.Pumpkin, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-    Size = UDim2.new(0, 200 * self.ScaleFactor, 0, 200 * self.ScaleFactor), -- Capital S in ScaleFactor
-    TextTransparency = 0
-})
-        pumpkinTween:Play()
-        pumpkinTween.Completed:Wait()
-    end)
+    self.Pumpkin.Visible = true
+    local pumpkinTween = TweenService:Create(self.Pumpkin, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Size = UDim2.new(0, 200 * self.ScaleFactor, 0, 200 * self.ScaleFactor),
+        TextTransparency = 0
+    })
+    pumpkinTween:Play()
+    pumpkinTween.Completed:Wait()
+    print("Pumpkin animation completed")
 
-    if not success then
-        warn("Pumpkin Animation failed:", errorMessage)
-        self.MainFrame.Visible = true -- Fallback: Make the UI visible anyway
-        self.LoadingFrame:Destroy()
-        return  -- Prevent further animation steps
-    end
+    -- Final transition
+    task.wait(0.5) -- Short pause for visual effect
 
-    print("Pumpkin Animation completed")
-
-    -- Final Cleanup and UI Visibility
-    success, errorMessage = pcall(function()
-        task.wait(0.5)  -- Short pause for visual effect
-        self.LoadingFrame:Destroy()
-        self.MainFrame.Visible = true
-    end)
-
-    if not success then
-        warn("Final cleanup/visibility failed:", errorMessage)
-        self.MainFrame.Visible = true -- ENSURE MainFrame is visible
-        self.LoadingFrame:Destroy()
-        return -- Prevent the code from running after error
-    end
-    print("PlayLoadingAnimation finished successfully")
-
-    -- Add this at the end of PlayLoadingAnimation
-task.delay(5, function() -- Safety timeout
-    if self.LoadingFrame and self.LoadingFrame.Parent then
+    -- Cleanup loading screen
+    if self.LoadingFrame then
         self.LoadingFrame:Destroy()
     end
+
+    -- Ensure MainFrame is visible
     if self.MainFrame then
         self.MainFrame.Visible = true
     end
-end)
 
+    -- Cancel safety timeout
+    task.cancel(safetyTimeout)
+    print("Loading animation completed successfully")
 end
 
 function HallowHub:DestroyUI()
