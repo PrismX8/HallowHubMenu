@@ -1,4 +1,3 @@
---new
 local HallowHub = {}
 HallowHub.__index = HallowHub
 
@@ -147,22 +146,15 @@ function HallowHub:CreateUserInfo()
         return
     end
 
-    local success, errorMsg = pcall(function()
-        player.UserId
-    end)
-    if not success then
-        warn("UserId error:", errorMsg)
-        return
-    end
-
     local userInfo = self:CreateElement("Frame", {
         Size = UDim2.new(1, 0, 0, 60 * self.ScaleFactor),
         BackgroundTransparency = 1,
     }, self.LeftSide)
 
+    -- Get player thumbnail
     local thumbnailSuccess, thumbnail = pcall(function()
         return Players:GetUserThumbnailAsync(
-            player.UserId,
+            player.UserId, -- Use the UserId property directly
             Enum.ThumbnailType.HeadShot,
             Enum.ThumbnailSize.Size420x420
         )
