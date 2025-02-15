@@ -1,4 +1,3 @@
---new
 local HallowHub = {}
 HallowHub.__index = HallowHub
 
@@ -731,7 +730,6 @@ function HallowHub:CreateDropdown(tab, properties, options)
 end
 
 function HallowHub:CreateToggle(tab, properties, callback)
-    function HallowHub:CreateToggle(tab, properties, callback)
     local defaultProps = {
         Size = UDim2.new(1, -20 * self.ScaleFactor, 0, 40 * self.ScaleFactor),
         BackgroundColor3 = COLORS.SECONDARY,
