@@ -1,3 +1,4 @@
+--new
 local HallowHub = {}
 HallowHub.__index = HallowHub
 
@@ -210,12 +211,27 @@ function HallowHub:AddTab(tabName)
     self:AddUICorner(tab.Button, CORNER_RADIUS)
 
     tab.Content = self:CreateElement("ScrollingFrame", {
-        Size = UDim2.new(1, 0, 1, 0),
+        Size = UDim2.new(1, 0, 1, -10 * self.ScaleFactor),
+        Position = UDim2.new(0, 0, 0, 10 * self.ScaleFactor),
         BackgroundTransparency = 1,
-        Visible = false,
         ScrollBarThickness = 4,
         ScrollBarImageColor3 = COLORS.ACCENT,
+        CanvasSize = UDim2.new(0, 0, 0, 0),
+        AutomaticCanvasSize = Enum.AutomaticSize.Y,
     }, self.ContentArea)
+
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.Parent = tab.Content
+    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    UIListLayout.Padding = UDim.new(0, 10 * self.ScaleFactor)
+
+    -- Add content padding
+    local contentPadding = Instance.new("UIPadding")
+    contentPadding.PaddingLeft = UDim.new(0, 10 * self.ScaleFactor)
+    contentPadding.PaddingRight = UDim.new(0, 10 * self.ScaleFactor)
+    contentPadding.PaddingTop = UDim.new(0, 10 * self.ScaleFactor)
+    contentPadding.PaddingBottom = UDim.new(0, 10 * self.ScaleFactor)
+    contentPadding.Parent = tab.Content
 
     local UIListLayout = Instance.new("UIListLayout")
     UIListLayout.Parent = tab.Content
@@ -431,51 +447,237 @@ function HallowHub:DestroyUI()
 end
 
 -- New UI element creation functions
+-- Updated CreateButton function with proper styling and spacing
 function HallowHub:CreateButton(tab, properties)
-    local button = self:CreateElement("TextButton", properties, tab.Content)
+    local defaultProps = {
+        Size = UDim2.new(1, -20 * self.ScaleFactor, 0, 40 * self.ScaleFactor),
+        BackgroundColor3 = COLORS.SECONDARY,
+        TextColor3 = COLORS.TEXT,
+        TextSize = 18 * self.ScaleFactor,
+        Font = Enum.Font.SourceSansBold,
+        AutoButtonColor = true,
+        LayoutOrder = #tab.Elements + 1
+    }
+    
+    -- Merge user properties with defaults
+    local mergedProps = {}
+    for k, v in pairs(defaultProps) do mergedProps[k] = v end
+    for k, v in pairs(properties or {}) do mergedProps[k] = v end
+    
+    local button = self:CreateElement("TextButton", mergedProps, tab.Content)
+    self:AddUICorner(button, CORNER_RADIUS)
+    self:AddUIStroke(button, COLORS.STROKE, STROKE_THICKNESS)
+    
+    -- Add internal padding
+    local padding = Instance.new("UIPadding")
+    padding.PaddingLeft = UDim.new(0, 12 * self.ScaleFactor)
+    padding.PaddingRight = UDim.new(0, 12 * self.ScaleFactor)
+    padding.Parent = button
+    
     table.insert(tab.Elements, button)
     return button
 end
 
+-- Updated CreateLabel function with proper text alignment
 function HallowHub:CreateLabel(tab, properties)
-    local label = self:CreateElement("TextLabel", properties, tab.Content)
+    local defaultProps = {
+        Size = UDim2.new(1, -20 * self.ScaleFactor, 0, 24 * self.ScaleFactor),
+        BackgroundTransparency = 1,
+        TextColor3 = COLORS.TEXT,
+        TextSize = 16 * self.ScaleFactor,
+        Font = Enum.Font.SourceSansSemibold,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        LayoutOrder = #tab.Elements + 1
+    }
+    
+    -- Merge properties
+    local mergedProps = {}
+    for k, v in pairs(defaultProps) do mergedProps[k] = v end
+    for k, v in pairs(properties or {}) do mergedProps[k] = v end
+    
+    local label = self:CreateElement("TextLabel", mergedProps, tab.Content)
+    
+    -- Add label padding
+    local padding = Instance.new("UIPadding")
+    padding.PaddingLeft = UDim.new(0, 10 * self.ScaleFactor)
+    padding.PaddingRight = UDim.new(0, 10 * self.ScaleFactor)
+    padding.Parent = label
+    
     table.insert(tab.Elements, label)
     return label
 end
 
 function HallowHub:CreateTextBox(tab, properties)
-    local textBox = self:CreateElement("TextBox", properties, tab.Content)
+    local defaultProps = {
+        Size = UDim2.new(1, -20 * self.ScaleFactor, 0, 40 * self.ScaleFactor),
+        BackgroundColor3 = COLORS.SECONDARY,
+        TextColor3 = COLORS.TEXT,
+        TextSize = 16 * self.ScaleFactor,
+        PlaceholderColor3 = Color3.new(0.7, 0.7, 0.7),
+        Font = Enum.Font.SourceSans,
+        ClearTextOnFocus = false,
+        LayoutOrder = #tab.Elements + 1
+    }
+    
+    -- Merge properties
+    local mergedProps = {}
+    for k, v in pairs(defaultProps) do mergedProps[k] = v end
+    for k, v in pairs(properties or {}) do mergedProps[k] = v end
+    
+    local textBox = self:CreateElement("TextBox", mergedProps, tab.Content)
+    self:AddUICorner(textBox, CORNER_RADIUS)
+    self:AddUIStroke(textBox, COLORS.STROKE, STROKE_THICKNESS)
+    
+    -- Add input padding
+    local padding = Instance.new("UIPadding")
+    padding.PaddingLeft = UDim.new(0, 12 * self.ScaleFactor)
+    padding.PaddingRight = UDim.new(0, 12 * self.ScaleFactor)
+    padding.Parent = textBox
+    
     table.insert(tab.Elements, textBox)
     return textBox
 end
 
-function HallowHub:CreateSlider(tab, properties)
-    local slider = Instance.new("Frame")
-    for prop, value in pairs(properties) do
-        slider[prop] = value
-    end
-    slider.Parent = tab.Content
+function HallowHub:CreateSlider(tab, properties, callback)
+    -- Default properties for the slider
+    local defaultProps = {
+        Size = UDim2.new(1, -20 * self.ScaleFactor, 0, 60 * self.ScaleFactor), -- Slider container size
+        BackgroundTransparency = 1, -- Transparent background
+        LayoutOrder = #tab.Elements + 1, -- Automatically set layout order
+    }
 
-    local background = self:CreateElement("Frame", {
-        Size = UDim2.new(1, 0, 0.2, 0),
-        BackgroundColor3 = COLORS.SECONDARY,
-        Position = UDim2.new(0, 0, 0.4, 0),
-        BorderSizePixel = 0,
-    }, slider)
+    -- Merge user-provided properties with defaults
+    local mergedProps = {}
+    for k, v in pairs(defaultProps) do mergedProps[k] = v end
+    for k, v in pairs(properties or {}) do mergedProps[k] = v end
 
+    -- Create the slider container
+    local sliderContainer = self:CreateElement("Frame", mergedProps, tab.Content)
+
+    -- Label for the slider
+    local label = self:CreateElement("TextLabel", {
+        Size = UDim2.new(1, 0, 0, 20 * self.ScaleFactor), -- Label size
+        BackgroundTransparency = 1, -- Transparent background
+        Text = properties.Label or "Slider", -- Default label text
+        TextColor3 = COLORS.TEXT, -- Text color
+        TextSize = 14 * self.ScaleFactor, -- Text size
+        Font = Enum.Font.SourceSansSemibold, -- Font
+        TextXAlignment = Enum.TextXAlignment.Left, -- Left-aligned text
+    }, sliderContainer)
+
+    -- Slider track (background)
+    local track = self:CreateElement("Frame", {
+        Size = UDim2.new(1, 0, 0, 4 * self.ScaleFactor), -- Track height
+        Position = UDim2.new(0, 0, 1, -14 * self.ScaleFactor), -- Position at the bottom
+        AnchorPoint = Vector2.new(0, 1), -- Anchor to bottom-left
+        BackgroundColor3 = COLORS.SECONDARY, -- Track color
+    }, sliderContainer)
+    self:AddUICorner(track, 2 * self.ScaleFactor) -- Rounded corners
+
+    -- Slider fill (progress indicator)
+    local fill = self:CreateElement("Frame", {
+        Size = UDim2.new(0, 0, 1, 0), -- Initial fill size (0%)
+        BackgroundColor3 = COLORS.ACCENT, -- Fill color
+    }, track)
+    self:AddUICorner(fill, 2 * self.ScaleFactor) -- Rounded corners
+
+    -- Slider thumb (draggable handle)
     local thumb = self:CreateElement("Frame", {
-        Size = UDim2.new(0, 20, 1, 0),
-        BackgroundColor3 = COLORS.ACCENT,
-        Position = UDim2.new(0, 0, 0, 0),
-        BorderSizePixel = 0,
-        Draggable = true,
-    }, background)
+        Size = UDim2.new(0, 20 * self.ScaleFactor, 1, 0), -- Thumb size
+        AnchorPoint = Vector2.new(0.5, 0.5), -- Center anchor
+        Position = UDim2.new(0, 0, 0.5, 0), -- Initial position
+        BackgroundColor3 = COLORS.TEXT, -- Thumb color
+    }, track)
+    self:AddUICorner(thumb, 10 * self.ScaleFactor, true) -- Circular thumb
 
-    -- Implement slider drag functionality here
-    -- Update the slider's value based on the thumb's position
+    -- Value display label
+    local valueLabel = self:CreateElement("TextLabel", {
+        Size = UDim2.new(1, 0, 0, 20 * self.ScaleFactor), -- Value label size
+        Position = UDim2.new(0, 0, 0, -24 * self.ScaleFactor), -- Position above the track
+        BackgroundTransparency = 1, -- Transparent background
+        Text = "0%", -- Initial value
+        TextColor3 = COLORS.TEXT, -- Text color
+        TextSize = 14 * self.ScaleFactor, -- Text size
+        Font = Enum.Font.SourceSansSemibold, -- Font
+        TextXAlignment = Enum.TextXAlignment.Left, -- Left-aligned text
+    }, sliderContainer)
 
-    table.insert(tab.Elements, slider)
-    return slider
+    -- Slider logic
+    local minValue = properties.Min or 0 -- Minimum value (default: 0)
+    local maxValue = properties.Max or 100 -- Maximum value (default: 100)
+    local currentValue = minValue -- Start at the minimum value
+
+    -- Function to update the slider's visual state
+    local function updateSlider(value)
+        -- Clamp the value between min and max
+        value = math.clamp(value, minValue, maxValue)
+
+        -- Calculate the percentage of the slider
+        local percent = (value - minValue) / (maxValue - minValue)
+
+        -- Update the fill and thumb positions
+        fill.Size = UDim2.new(percent, 0, 1, 0)
+        thumb.Position = UDim2.new(percent, 0, 0.5, 0)
+
+        -- Update the value label
+        valueLabel.Text = tostring(math.floor(value)) .. (properties.Unit or "%")
+
+        -- Invoke the callback if provided
+        if callback then
+            callback(value)
+        end
+    end
+
+    -- Function to handle thumb dragging
+    local function onThumbDrag(input)
+        local trackAbsoluteSize = track.AbsoluteSize.X
+        local thumbAbsoluteSize = thumb.AbsoluteSize.X
+        local mouseX = input.Position.X
+        local trackStart = track.AbsolutePosition.X
+        local trackEnd = trackStart + trackAbsoluteSize
+
+        -- Calculate the new position of the thumb
+        local newX = math.clamp(mouseX - trackStart, 0, trackAbsoluteSize)
+        local percent = newX / trackAbsoluteSize
+
+        -- Calculate the new value
+        local newValue = minValue + (maxValue - minValue) * percent
+
+        -- Update the slider
+        updateSlider(newValue)
+    end
+
+    -- Connect input events to the thumb
+    thumb.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            -- Start dragging
+            local connection
+            connection = input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    -- Stop dragging
+                    connection:Disconnect()
+                else
+                    -- Update thumb position while dragging
+                    onThumbDrag(input)
+                end
+            end)
+        end
+    end)
+
+    -- Connect input events to the track (click to jump)
+    track.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            onThumbDrag(input)
+        end
+    end)
+
+    -- Initialize the slider with the default value
+    updateSlider(currentValue)
+
+    -- Add the slider to the tab's elements
+    table.insert(tab.Elements, sliderContainer)
+
+    return sliderContainer
 end
 
 function HallowHub:CreateDropdown(tab, properties, options)
@@ -529,6 +731,33 @@ function HallowHub:CreateDropdown(tab, properties, options)
 end
 
 function HallowHub:CreateToggle(tab, properties, callback)
+    local defaultProps = {
+        Size = UDim2.new(1, -20 * self.ScaleFactor, 0, 40 * self.ScaleFactor),
+        BackgroundColor3 = COLORS.SECONDARY,
+        Text = "Toggle",
+        TextColor3 = COLORS.TEXT,
+        TextSize = 16 * self.ScaleFactor,
+        Font = Enum.Font.SourceSansSemibold,
+        LayoutOrder = #tab.Elements + 1
+    }
+    
+    -- Merge properties
+    local mergedProps = {}
+    for k, v in pairs(defaultProps) do mergedProps[k] = v end
+    for k, v in pairs(properties or {}) do mergedProps[k] = v end
+    
+    local toggle = self:CreateElement("TextButton", mergedProps, tab.Content)
+    self:AddUICorner(toggle, CORNER_RADIUS)
+    self:AddUIStroke(toggle, COLORS.STROKE, STROKE_THICKNESS)
+    
+    -- Toggle indicator
+    local indicator = self:CreateElement("Frame", {
+        Size = UDim2.new(0, 24 * self.ScaleFactor, 0, 24 * self.ScaleFactor),
+        Position = UDim2.new(1, -32 * self.ScaleFactor, 0.5, 0),
+        AnchorPoint = Vector2.new(1, 0.5),
+        BackgroundColor3 = Color3.fromRGB(80, 80, 80),
+    }, toggle)
+    self:AddUICorner(indicator, 12 * self.ScaleFactor, true)
     local toggle = self:CreateElement("TextButton", properties, tab.Content)
     local isOn = false
     toggle.MouseButton1Click:Connect(function()
