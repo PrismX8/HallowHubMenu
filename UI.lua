@@ -1,4 +1,4 @@
-
+--new
 local library = {}
 
 for i, v in pairs(game.CoreGui:GetDescendants()) do
@@ -106,182 +106,142 @@ function library:Destroy()
 end
 
 function library:Window(grad1, grad2, name)
+	-- Configuration
+    local ACCENT_COLOR = Color3.fromRGB(140, 116, 255)
+    local BACKGROUND_COLOR = Color3.fromRGB(25, 25, 25)
+    local TEXT_COLOR = Color3.fromRGB(240, 240, 240)
+
+    -- Main Window Setup
     local OrbitLibraryClean = Instance.new("ScreenGui")
     local Main = Instance.new("Frame")
     local TopBar = Instance.new("Frame")
-    local Frame = Instance.new("Frame")
+    local gradientFrame = Instance.new("Frame")
     local UIGradient = Instance.new("UIGradient")
-    local TextLabel = Instance.new("TextLabel")
-    local clear = Instance.new("ImageButton")
+    local title = Instance.new("TextLabel")
+    local closeBtn = Instance.new("ImageButton")
     local UICorner = Instance.new("UICorner")
-    local Frame_2 = Instance.new("Frame")
-    local UIGradient_2 = Instance.new("UIGradient")
-    local UICorner_2 = Instance.new("UICorner")
     local Navigation = Instance.new("ScrollingFrame")
-    local Frame_3 = Instance.new("Frame")
-    local UIPadding = Instance.new("UIPadding")
-    local UICorner_4 = Instance.new("UICorner")
-    local UIListLayout_2 = Instance.new("UIListLayout")
+    local navContent = Instance.new("Frame")
+    local navLayout = Instance.new("UIListLayout")
     local shadow = Instance.new("ImageLabel")
+    local blurEffect = Instance.new("BlurEffect")
 
-
-
-
-
-    Main.AnchorPoint = Vector2.new(0.5, 0.5)
-    Main.Position = UDim2.new(0.5,0,0.5,0)
-
-    local tabHandler = {}
-
-    OrbitLibraryClean.Name = "卢卡斯"
+    OrbitLibraryClean.Name = "ModernUI"
     OrbitLibraryClean.Parent = game.CoreGui
+    OrbitLibraryClean.ResetOnSpawn = false
 
-    MakeDraggable(TopBar)
+    -- Blur Effect
+    blurEffect.Size = 12
+    blurEffect.Parent = OrbitLibraryClean
 
     Main.Name = "Main"
     Main.Parent = OrbitLibraryClean
-    Main.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+    Main.BackgroundColor3 = BACKGROUND_COLOR
+    Main.BackgroundTransparency = 0.1
     Main.BorderSizePixel = 0
+    Main.Size = UDim2.new(0, 500, 0, 400)
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
-    Main.Position = UDim2.new(0.5,0,-1.5,0)
-    Main.Size = UDim2.new(0, 475, 0, 298)
+    Main.Position = UDim2.new(0.5, 0, 0.5, 0)
+    Main.ClipsDescendants = true
 
-
-    TopBar.Name = "TopBar"
-    TopBar.Parent = Main
-    TopBar.BackgroundColor3 = Color3.fromRGB(106, 106, 106)
-    TopBar.BorderSizePixel = 0
-    TopBar.Size = UDim2.new(0, 475, 0, 32)
-
-    Frame.Parent = TopBar
-    Frame.AnchorPoint = Vector2.new(0, 1)
-    Frame.BackgroundColor3 = Color3.fromRGB(106, 106, 106)
-    Frame.BorderSizePixel = 0
-    Frame.Position = UDim2.new(0, 0, 1, 0)
-    Frame.Size = UDim2.new(0, 475, 0, 4)
-
-    if grad1 and grad2 then
-        UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, grad1), ColorSequenceKeypoint.new(1.00, grad2)}
-    else
-        UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(137, 0, 253)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(223, 0, 255))}
-    end
-    UIGradient.Parent = Frame
-
-    TextLabel.Parent = TopBar
-    TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    TextLabel.BackgroundTransparency = 1.000
-    TextLabel.BorderSizePixel = 0
-    TextLabel.Position = UDim2.new(0.0147368424, 0, 0, 0)
-    TextLabel.Size = UDim2.new(0, 388, 0, 32)
-    TextLabel.Font = Enum.Font.GothamBold
-    if name then
-        TextLabel.Text = name
-    else
-        TextLabel.Text = "Orbit Library"
-    end
-    TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TextLabel.TextSize = 14.000
-    TextLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-    clear.Name = "clear"
-    clear.Parent = TopBar
-    clear.AnchorPoint = Vector2.new(1, 0)
-    clear.BackgroundTransparency = 1.000
-    clear.LayoutOrder = 3
-    clear.Position = UDim2.new(0.987368405, 0, 0.09375, 0)
-    clear.Size = UDim2.new(0, 25, 0, 25)
-    clear.ZIndex = 2
-    clear.Image = "rbxassetid://3926305904"
-    clear.ImageRectOffset = Vector2.new(924, 724)
-    clear.ImageRectSize = Vector2.new(36, 36)
-
-    clear.MouseButton1Click:Connect(function()
-        getgenv().con:Disconnect()
-        wait(0.1)
-        game:GetService("TweenService"):Create(Main, TweenInfo.new(1), {Position = UDim2.new(Main.Position.X.Scale, Main.Position.X.Offset, 1.5, 0)}):Play()
-        wait(1.05)
-        Main.Position = UDim2.new(0.5, 0, 2, 0)
-        OrbitLibraryClean.Enabled = false
-    end)
-
-    game:GetService("UserInputService").InputBegan:Connect(function(i, gp)
-        if not gp then
-            if i.UserInputType == Enum.UserInputType.Keyboard then
-                if i.KeyCode == Enum.KeyCode.RightShift then
-                    if OrbitLibraryClean.Enabled == false then
-                        OrbitLibraryClean.Enabled = true
-                        MakeDraggable(TopBar)
-                        Main.Position = UDim2.new(0.5, 0, 1.5, 0)
-                        game:GetService("TweenService"):Create(Main, TweenInfo.new(0.5), {Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
-                    end
-                end
-            end
-        end
-    end)
-
-    UICorner.CornerRadius = UDim.new(0, 6)
-    UICorner.Parent = TopBar
-
-    Frame_2.Parent = TopBar
-    Frame_2.AnchorPoint = Vector2.new(0, 1)
-    Frame_2.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
-    Frame_2.BorderSizePixel = 0
-    Frame_2.Position = UDim2.new(0, 0, 1, 0)
-    Frame_2.Size = UDim2.new(0, 475, 0, -1)
-
-    if grad1 and grad2 then
-        UIGradient_2.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, grad1), ColorSequenceKeypoint.new(1.00, grad2)}
-    else
-        UIGradient_2.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(137, 0, 253)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(223, 0, 255))}
-    end
-    UIGradient_2.Parent = TopBar
-
-    UICorner_2.Parent = Main
-
-    Navigation.Name = "Navigation"
-    Navigation.Parent = Main
-    Navigation.BorderColor3 = Color3.fromRGB(27, 42, 53)
-    Navigation.BackgroundColor3 = Color3.fromRGB(42, 42, 42)
-    Navigation.BackgroundTransparency = 1.000
-    Navigation.ScrollBarImageColor3 = Color3.fromRGB(63, 63, 63)
-    Navigation.BorderSizePixel = 0
-    Navigation.Position = UDim2.new(0, 0, 0, 24)
-    Navigation.Selectable = false
-    Navigation.Size = UDim2.new(0, 137, 0, 255)
-    Navigation.ScrollBarThickness = 4
-
-    Frame_3.Parent = Navigation
-    Frame_3.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    Frame_3.BackgroundTransparency = 1.000
-    Frame_3.BorderColor3 = Color3.fromRGB(27, 42, 53)
-    Frame_3.Position = UDim2.new(0.0167009085, 0, 0.0301642083, 0)
-    Frame_3.Size = UDim2.new(0.983, 0, 1, 0)
-
-    UIPadding.Parent = Frame_3
-    UIPadding.PaddingLeft = UDim.new(0, 8)
-
-    UICorner_4.Parent = Navigation
-
-    UIListLayout_2.Parent = Frame_3
-    UIListLayout_2.SortOrder = Enum.SortOrder.LayoutOrder
-    UIListLayout_2.Padding = UDim.new(0, 2)
-    UIListLayout_2.FillDirection = Enum.FillDirection.Vertical
-    UIListLayout_2.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    UIListLayout_2.VerticalAlignment = Enum.VerticalAlignment.Top
-    UIListLayout_2.SortOrder = Enum.SortOrder.LayoutOrder
-
+    -- Modern Shadow Effect
     shadow.Name = "shadow"
     shadow.Parent = Main
     shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-    shadow.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    shadow.BackgroundTransparency = 1.000
-    shadow.BorderSizePixel = 0
-    shadow.Position = UDim2.new(0.507476628, 0, 0.509803951, 0)
-    shadow.Size = UDim2.new(1.60000002, 0, 1.29999995, 0)
-    shadow.ZIndex = 0
-    shadow.Image = "rbxassetid://5587865193"
-    shadow.ImageColor3 = Color3.fromRGB(20, 20, 20)
-    shadow.ImageTransparency = 0.400
+    shadow.BackgroundTransparency = 1
+    shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
+    shadow.Size = UDim2.new(1, 20, 1, 20)
+    shadow.ZIndex = -1
+    shadow.Image = "rbxassetid://8573778321"
+    shadow.ImageColor3 = Color3.new(0, 0, 0)
+    shadow.ImageTransparency = 0.8
+    shadow.ScaleType = Enum.ScaleType.Slice
+    shadow.SliceCenter = Rect.new(10, 10, 118, 118)
+
+    -- Top Bar with Glassmorphism Effect
+    TopBar.Name = "TopBar"
+    TopBar.Parent = Main
+    TopBar.BackgroundColor3 = BACKGROUND_COLOR
+    TopBar.BackgroundTransparency = 0.3
+    TopBar.Size = UDim2.new(1, 0, 0, 40)
+
+    -- Gradient Line
+    gradientFrame.Parent = TopBar
+    gradientFrame.BackgroundColor3 = ACCENT_COLOR
+    gradientFrame.BorderSizePixel = 0
+    gradientFrame.Size = UDim2.new(1, 0, 0, 2)
+    gradientFrame.Position = UDim2.new(0, 0, 1, -2)
+
+    UIGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, grad1 or ACCENT_COLOR),
+        ColorSequenceKeypoint.new(1, grad2 or Color3.fromRGB(100, 80, 220))
+    }
+    UIGradient.Rotation = -15
+    UIGradient.Parent = gradientFrame
+
+    -- Modern Title Text
+    title.Parent = TopBar
+    title.Text = name or "Modern UI Library"
+    title.Font = Enum.Font.GothamSemibold
+    title.TextColor3 = TEXT_COLOR
+    title.TextSize = 16
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.BackgroundTransparency = 1
+    title.Position = UDim2.new(0.03, 0, 0, 0)
+    title.Size = UDim2.new(0.7, 0, 1, 0)
+
+    -- Stylish Close Button
+    closeBtn.Name = "closeBtn"
+    closeBtn.Parent = TopBar
+    closeBtn.AnchorPoint = Vector2.new(1, 0.5)
+    closeBtn.Position = UDim2.new(1, -10, 0.5, 0)
+    closeBtn.Size = UDim2.new(0, 24, 0, 24)
+    closeBtn.Image = "rbxassetid://3926305904"
+    closeBtn.ImageRectOffset = Vector2.new(924, 724)
+    closeBtn.ImageRectSize = Vector2.new(36, 36)
+    closeBtn.ImageColor3 = TEXT_COLOR
+    closeBtn.BackgroundTransparency = 1
+
+    -- Hover effects
+    closeBtn.MouseEnter:Connect(function()
+        game.TweenService:Create(closeBtn, TweenInfo.new(0.2), {
+            ImageColor3 = ACCENT_COLOR,
+            Rotation = 90
+        }):Play()
+    end)
+
+    closeBtn.MouseLeave:Connect(function()
+        game.TweenService:Create(closeBtn, TweenInfo.new(0.2), {
+            ImageColor3 = TEXT_COLOR,
+            Rotation = 0
+        }):Play()
+    end)
+
+    -- Navigation Panel
+    Navigation.Parent = Main
+    Navigation.BackgroundTransparency = 1
+    Navigation.ScrollBarThickness = 4
+    Navigation.ScrollBarImageColor3 = ACCENT_COLOR
+    Navigation.Position = UDim2.new(0, 0, 0, 40)
+    Navigation.Size = UDim2.new(0, 160, 1, -40)
+
+    navContent.Parent = Navigation
+    navContent.BackgroundTransparency = 1
+    navContent.Size = UDim2.new(1, 0, 1, 0)
+
+    navLayout.Parent = navContent
+    navLayout.Padding = UDim.new(0, 8)
+    navLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    -- Corner Radius
+    UICorner.CornerRadius = UDim.new(0, 8)
+    UICorner.Parent = Main
+
+    -- Animation Effects
+    Main.Size = UDim2.new(0, 0, 0, 0)
+    game.TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
+        Size = UDim2.new(0, 500, 0, 400)
+    }):Play()
 
     local function ALERD355_fake_script()
         local script = Instance.new('LocalScript', Main)
