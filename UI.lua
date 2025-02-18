@@ -140,7 +140,7 @@ function library:Window(grad1, grad2, name)
 
     Main.Name = "Main"
     Main.Parent = OrbitLibraryClean
-    Main.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+    Main.BackgroundColor3 = Color3.fromRGB(127, 0, 255)
     Main.BorderSizePixel = 0
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
     Main.Position = UDim2.new(0.5,0,-1.5,0)
@@ -149,13 +149,13 @@ function library:Window(grad1, grad2, name)
 
     TopBar.Name = "TopBar"
     TopBar.Parent = Main
-    TopBar.BackgroundColor3 = Color3.fromRGB(106, 106, 106)
+    TopBar.BackgroundColor3 = Color3.fromRGB(255, 178, 102)
     TopBar.BorderSizePixel = 0
     TopBar.Size = UDim2.new(0, 475, 0, 32)
 
     Frame.Parent = TopBar
     Frame.AnchorPoint = Vector2.new(0, 1)
-    Frame.BackgroundColor3 = Color3.fromRGB(106, 106, 106)
+    Frame.BackgroundColor3 = Color3.fromRGB(153, 76, 0)
     Frame.BorderSizePixel = 0
     Frame.Position = UDim2.new(0, 0, 1, 0)
     Frame.Size = UDim2.new(0, 475, 0, 4)
