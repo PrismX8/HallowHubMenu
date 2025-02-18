@@ -140,7 +140,7 @@ function library:Window(grad1, grad2, name)
 
     Main.Name = "Main"
     Main.Parent = OrbitLibraryClean
-    Main.BackgroundColor3 = Color3.fromRGB(127, 0, 255)
+    Main.BackgroundColor3 = Color3.fromRGB(25, 0, 51)
     Main.BorderSizePixel = 0
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
     Main.Position = UDim2.new(0.5,0,-1.5,0)
@@ -403,6 +403,8 @@ function library:Window(grad1, grad2, name)
         MainArea.HorizontalScrollBarInset = Enum.ScrollBarInset.ScrollBar
         MainArea.ScrollBarThickness = 3
         MainArea.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+	MainArea.TopPadding = UDim.new(0, 10)
+
 
         local function PSGUYO_fake_script()
             local script = Instance.new('LocalScript', MainArea)
