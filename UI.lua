@@ -403,7 +403,6 @@ function library:Window(grad1, grad2, name)
         MainArea.HorizontalScrollBarInset = Enum.ScrollBarInset.ScrollBar
         MainArea.ScrollBarThickness = 3
         MainArea.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
-	MainArea.TopPadding = UDim.new(0, 10)
 
 
         local function PSGUYO_fake_script()
