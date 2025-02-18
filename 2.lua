@@ -103,7 +103,7 @@ function HallowHub:CreateLoadingScreen()
         TextSize = 100,
         TextTransparency = 1,
         AnchorPoint = Vector2.new(0.5, 0.5),
-        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Position = UDim2.new(0.5, -10, 0.5, 0),
         BackgroundTransparency = 1,
     }, self.LoadingFrame)
 end
