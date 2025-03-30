@@ -3,23 +3,29 @@ Library.__index = Library
 
 -- Services
 local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 -- Constants
 local ACCENT = Color3.fromRGB(255, 85, 127)
 local BACKGROUND = Color3.fromRGB(25, 25, 25)
+local GRADIENT_TOP = Color3.fromRGB(40, 40, 40)
+local GRADIENT_BOTTOM = Color3.fromRGB(20, 20, 20)
 local EASING = Enum.EasingStyle.Quint
-local TRANSITION_TIME = 0.25
+local TRANSITION_TIME = 0.3
 
 function Library:CreateWindow(title)
     local window = setmetatable({}, Library)
-    
+
     -- Main Container
     window.gui = Instance.new("ScreenGui")
     window.gui.Name = "NeonUI"
     window.gui.ResetOnSpawn = false
     window.gui.Parent = game:GetService("CoreGui")
+
+    -- Blur Effect (Glassmorphism)
+    local blur = Instance.new("BlurEffect")
+    blur.Size = 10
+    blur.Parent = game.Lighting
 
     -- Main Frame
     window.main = Instance.new("Frame")
@@ -27,34 +33,36 @@ function Library:CreateWindow(title)
     window.main.Position = UDim2.new(0.5, -225, 0.5, -175)
     window.main.AnchorPoint = Vector2.new(0.5, 0.5)
     window.main.BackgroundColor3 = BACKGROUND
+    window.main.BackgroundTransparency = 0.15
+    window.main.BorderSizePixel = 0
     window.main.Parent = window.gui
 
-    -- Add modern effects
-    local shadow = Instance.new("ImageLabel")
-    shadow.Image = "rbxassetid://8573778321"
-    shadow.ScaleType = Enum.ScaleType.Slice
-    shadow.SliceCenter = Rect.new(10, 10, 118, 118)
-    shadow.ImageColor3 = Color3.new(0, 0, 0)
-    shadow.ImageTransparency = 0.8
-    shadow.Size = UDim2.new(1, 20, 1, 20)
-    shadow.Position = UDim2.new(0.5, -10, 0.5, -10)
-    shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-    shadow.ZIndex = -1
-    shadow.Parent = window.main
+    -- Rounded Corners
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = window.main
+
+    -- Gradient Background
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, GRADIENT_TOP),
+        ColorSequenceKeypoint.new(1, GRADIENT_BOTTOM)
+    }
+    gradient.Parent = window.main
 
     -- Top Bar
     window.topBar = Instance.new("Frame")
     window.topBar.Size = UDim2.new(1, 0, 0, 40)
-    window.topBar.BackgroundColor3 = BACKGROUND
+    window.topBar.BackgroundTransparency = 1
     window.topBar.Parent = window.main
 
-    -- Add draggable functionality
+    -- Make the window draggable
     window:Draggable(window.topBar)
 
     -- Title
     window.title = Instance.new("TextLabel")
     window.title.Text = title
-    window.title.Font = Enum.Font.GothamBold
+    window.title.Font = Enum.Font.Ubuntu
     window.title.TextColor3 = Color3.new(1, 1, 1)
     window.title.TextSize = 18
     window.title.Size = UDim2.new(0.7, 0, 1, 0)
@@ -63,7 +71,7 @@ function Library:CreateWindow(title)
     window.title.BackgroundTransparency = 1
     window.title.Parent = window.topBar
 
-    -- Tab System
+    -- Tab System (Sidebar)
     window.tabHolder = Instance.new("ScrollingFrame")
     window.tabHolder.Size = UDim2.new(0.25, 0, 1, -40)
     window.tabHolder.Position = UDim2.new(0, 0, 0, 40)
@@ -82,20 +90,35 @@ function Library:CreateWindow(title)
     return window
 end
 
-function Library:CreateTab(name)
+function Library:CreateTab(name, iconId)
     local tab = {}
     tab.name = name
-    
+
     -- Tab Button
     tab.button = Instance.new("TextButton")
-    tab.button.Text = name
     tab.button.Size = UDim2.new(0.9, 0, 0, 35)
     tab.button.Position = UDim2.new(0.05, 0, 0, #self.tabHolder:GetChildren() * 40)
     tab.button.BackgroundColor3 = BACKGROUND
     tab.button.TextColor3 = Color3.new(1, 1, 1)
     tab.button.Font = Enum.Font.Gotham
     tab.button.TextSize = 14
+    tab.button.Text = name
     tab.button.Parent = self.tabHolder
+
+    -- Rounded Corners for Button
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = tab.button
+
+    -- Icon for Tab
+    if iconId then
+        local icon = Instance.new("ImageLabel")
+        icon.Image = "rbxassetid://" .. iconId
+        icon.Size = UDim2.new(0, 20, 0, 20)
+        icon.Position = UDim2.new(0.05, 0, 0.5, -10)
+        icon.BackgroundTransparency = 1
+        icon.Parent = tab.button
+    end
 
     -- Tab Content
     tab.content = Instance.new("ScrollingFrame")
@@ -106,7 +129,7 @@ function Library:CreateTab(name)
     tab.content.Visible = false
     tab.content.Parent = self.content
 
-    -- Activate first tab
+    -- First tab activates automatically
     if #self.tabHolder:GetChildren() == 1 then
         tab.content.Visible = true
         tab.button.BackgroundColor3 = ACCENT
@@ -118,7 +141,7 @@ function Library:CreateTab(name)
             otherTab.Visible = false
         end
         tab.content.Visible = true
-        
+
         -- Animate button colors
         self:Tween(tab.button, {BackgroundColor3 = ACCENT})
         for _, btn in pairs(self.tabHolder:GetChildren()) do
@@ -142,32 +165,27 @@ function Library:CreateButton(tab, text, callback)
     button.TextSize = 14
     button.Parent = tab.content
 
-    -- Hover effects
+    -- Rounded Corners
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = button
+
+    -- Hover Effect
     button.MouseEnter:Connect(function()
         self:Tween(button, {BackgroundColor3 = ACCENT:Lerp(Color3.new(1,1,1), 0.1)})
     end)
-    
+
     button.MouseLeave:Connect(function()
         self:Tween(button, {BackgroundColor3 = BACKGROUND})
     end)
 
-    -- Click handler
+    -- Click Effect
     button.MouseButton1Click:Connect(function()
-        self:Tween(button, {Size = UDim2.new(0.85, 0, 0, 35)}, {
-            easing = Enum.EasingStyle.Back,
-            direction = Enum.EasingDirection.Out,
-            time = 0.2
-        }, function()
-            self:Tween(button, {Size = UDim2.new(0.9, 0, 0, 35)})
-        end)
-        
         callback()
     end)
 
     return button
 end
-
--- Add other element creation functions (Toggle, Slider, etc.)
 
 function Library:Tween(object, properties, config, callback)
     local tweenInfo = TweenInfo.new(
@@ -175,50 +193,18 @@ function Library:Tween(object, properties, config, callback)
         config and config.easing or EASING,
         config and config.direction or Enum.EasingDirection.Out
     )
-    
+
     local tween = TweenService:Create(object, tweenInfo, properties)
     tween:Play()
-    
+
     if callback then
         tween.Completed:Connect(callback)
     end
 end
 
 function Library:Draggable(frame)
-    local dragging = false
-    local dragInput, dragStart, startPos
-
-    frame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = self.main.Position
-            
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
-
-    frame.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            dragInput = input
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            local delta = input.Position - dragStart
-            self.main.Position = UDim2.new(
-                startPos.X.Scale,
-                startPos.X.Offset + delta.X,
-                startPos.Y.Scale,
-                startPos.Y.Offset + delta.Y
-            )
-        end
-    end)
+    frame.Active = true
+    frame.Draggable = true
 end
 
 return Library
